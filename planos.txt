@@ -1,0 +1,72 @@
+Plano Básico
+Duração: Mensal
+Valor: R$ 79,90
+Benefícios:
+- Acesso ilimitado à academia das 06h às 22h
+- Uso de todos os equipamentos
+- Suporte básico dos instrutores
+
+Plano Padrão
+Duração: Mensal
+Valor: R$ 99,90
+Benefícios:
+- Acesso ilimitado à academia das 06h às 22h
+- Uso de todos os equipamentos
+- Suporte completo dos instrutores
+- Participação em aulas coletivas (Yoga, Funcional, HIIT)
+
+Plano Premium
+Duração: Mensal
+Valor: R$ 149,90
+Benefícios:
+- Acesso ilimitado 24h por dia
+- Uso de todos os equipamentos
+- Suporte completo dos instrutores
+- Participação em aulas coletivas
+- Acompanhamento com personal trainer 1x por semana
+- Avaliação física completa mensalmente
+
+Plano Anual Econômico
+Duração: 12 meses
+Valor: R$ 899,90 (Pagamento único)
+Benefícios:
+- Acesso ilimitado à academia das 06h às 22h
+- Uso de todos os equipamentos
+- Suporte básico dos instrutores
+- 2 avaliações físicas anuais gratuitas
+
+Plano Vip
+Duração: 6 meses
+Valor: R$ 799,90 (Pagamento único)
+Benefícios:
+- Acesso ilimitado 24h por dia
+- Uso de todos os equipamentos
+- Suporte completo dos instrutores
+- Participação em aulas coletivas
+- Personal trainer exclusivo 2x por semana
+- Avaliação física detalhada a cada 2 meses
+
+Plano Day Pass
+Duração: 1 dia
+Valor: R$ 19,90
+Benefícios:
+- Acesso único de um dia à academia
+- Uso de todos os equipamentos
+- Participação em uma aula coletiva do dia
+
+Plano Teste Para O Programa
+Duração: 2 Meses
+Valor: R$ 0,00 Reais
+Benefícios: 
+- Plano Gratuito
+- Para Testar O Programa
+- Seja Feliz
+- Hello World
+
+Platina
+Duração: 3 Meses
+Valor: R$ 1000,00
+Benefícios: 
+- Suporte Do Pedro
+- Suporte De Alimentação
+- Horario Integral
