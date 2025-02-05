@@ -191,7 +191,7 @@ def tratando(n):
 
 while True:
     Cabeçalho()
-    opcao = tratando(input("Digite o número da sua escolha: ").strip()[0])
+    opcao = tratando(input("Digite a opção: ").strip()[0])
     if opcao == 1:
         Cadastrar_Usuário()
     elif opcao == 2:
