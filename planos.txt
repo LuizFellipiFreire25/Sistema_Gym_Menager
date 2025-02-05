@@ -54,19 +54,10 @@ Benefícios:
 - Uso de todos os equipamentos
 - Participação em uma aula coletiva do dia
 
-Plano Teste Para O Programa
-Duração: 2 Meses
-Valor: R$ 0,00 Reais
-Benefícios: 
-- Plano Gratuito
-- Para Testar O Programa
-- Seja Feliz
-- Hello World
-
-Platina
+Plano Teste
 Duração: 3 Meses
-Valor: R$ 1000,00
+Valor: R$ 0,00
 Benefícios: 
-- Suporte Do Pedro
-- Suporte De Alimentação
-- Horario Integral
+- A Fim De Testar
+- Testando O Programa
+- Somente Um Teste

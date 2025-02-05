@@ -1,2 +1,3 @@
-ID,Nome,Email,Tipo de plano,Tipo de Plano
-1234,Joao leonardo,joaozinho@gmail.com,,2
+ID,Nome,Email,Tipo de plano,Tipo de Plano,Pagamento
+1234,Joao leonardo,joaozinho@gmail.com,,2,Pago
+1202,Lucas Francisco,haha@gmail.com,,2,Não Pago
