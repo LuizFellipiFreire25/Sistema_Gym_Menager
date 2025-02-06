@@ -4,12 +4,10 @@ from time import sleep
 
 
 def cabeçalho():
-    
-def cadastrar_usuario():
+
+    # def cadastrar_usuario():
     # caminho do arquivo
     arquivo = 'Usuarios.csv'
 
-    
-    
 
 cabeçalho()
