@@ -19,7 +19,7 @@ class Administrador:
             self.tabela = pd.read_csv(self.arquivo)
         else:
             # mais pra frente gerar id aleatoriamente
-            colunas = ['ID', 'Nome', 'Email', 'Tipo de plano']
+            colunas = ['ID', 'Nome', 'Email', 'Tipo de plano', 'Tipo']
             self.tabela = pd.DataFrame(columns=colunas)
 
     # método que vai salvar os dados sempre que preciso no arquivo
@@ -57,8 +57,11 @@ class Administrador:
             nome = input("Digite o Nome do aluno: ")
             senha = input("Digite uma Senha para o primeiro acesso do aluno: ")
             plano = input("Digite o tipo de plano do Aluno: ")
+            tipo = input(
+                "O usuário será Administrador ou Aluno? (A para Admin, L para Aluno) ").strip().upper()[0]
+            tipo = "Administrador" if tipo == "A" else "Aluno"
             novo = {'Nome': nome, 'ID': id,
-                    'Tipo de Plano': plano, 'Email': email}
+                    'Tipo de Plano': plano, 'Email': email, 'Tipo': tipo}
             self.tabela = self.tabela._append(novo, ignore_index=True)
             self.salvar()
 
@@ -215,4 +218,6 @@ if __name__ == "__main__":
             print("Obrigado!")
             break
 
-print("revisar o alterrar informações para pago")
+# print("revisar o alterrar informações para pago")
+# print("Estudar ultima parte")
+# tenho que separar a parte da senha, da presença e pensar em algo para o pagamento

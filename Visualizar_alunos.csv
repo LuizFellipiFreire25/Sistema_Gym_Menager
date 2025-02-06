@@ -1,3 +1,4 @@
-ID,Nome,Email,Tipo de plano,Tipo de Plano,Pagamento
-1234,Joao leonardo,joaozinho@gmail.com,,2,Pago
-1202,Lucas Francisco,haha@gmail.com,,2,Não Pago
+ID,Nome,Email,Tipo de plano,Tipo,Tipo de Plano
+2023005790,Luiz Fellipi,felipedanifreire@gmail.com,,Administrador,Nenhum
+2024000402,Veve,veronicasilvia@gmail.com,,Aluno,Plano Day Pass
+1502,kayllany,kaki@gmail.com,,Aluno,Plano Teste
