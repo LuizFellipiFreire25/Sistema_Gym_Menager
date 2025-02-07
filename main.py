@@ -1,54 +1,75 @@
-import Administrador  # Importando o módulo do administrador
 import pandas as pd
+import os
+from Administrador import Administrador
+from time import sleep
 
 
-def cabeçalho():
-    print("-=" * 30)
-    print("              Sistema de Gestão Academia Gym...")
-    print("-=" * 30)
+def opcoes():
+    # mostrando as opções do main.py
+    print("-="*30)
+    print("                 Sistema de gestão Gym...")
+    print("-="*30)
     print("Opções: ")
     lista = ['1. Login', '2. Cadastrar', '3. Sair']
     for elemento in lista:
         print(elemento)
-
-
-# Simulando um banco de usuários para login
-usuarios = {
-    "admin@gym.com": {"senha": "admin123", "tipo": "administrador"},
-    "aluno@gym.com": {"senha": "aluno123", "tipo": "aluno"}
-}
+    print("-="*30)
 
 
 def login():
-    email = input("Digite seu email: ")
-    senha = input("Digite sua senha: ")
+    # verificando se o arquivo existe
+    if not os.path.exists('Visualizar_alunos.csv'):
+        print("Nenhum usuário cadastrado ainda!")
+        return
+    # pedindo o email do usuário
+    email = input("Digite seu email: ").strip()
+    # abrindo o arquivo criado em Administrador.py em forma de tabela
+    tabela = pd.read_csv('Visualizar_alunos.csv')
 
-    if email in usuarios and usuarios[email]["senha"] == senha:
-        tipo_usuario = usuarios[email]["tipo"]
-        print(f"Login bem-sucedido como {tipo_usuario.capitalize()}!")
-
-        if tipo_usuario == "administrador":
-            admin = Administrador.Administrador()  # Instanciando a classe
-            admin.menu()  # Chamando o menu do administrador
-
-        elif tipo_usuario == "aluno":
-            print("Sistema para aluno ainda em construção...")
-            # Aqui você pode chamar funções do módulo aluno.py futuramente
-
+    if email in tabela['Email'].values:
+        # Obtendo a linha correspondente, iloc[0] garante que estarei filtrando a primeira linha do dataframe
+        usuario = tabela[tabela['Email'] == email].iloc[0]
+        if usuario['Tipo'] == 'Administrador':
+            print("Login bem-sucedido! Acessando o sistema do Administrador...")
+            sleep(0.5)
+            # nas proximas 20 linhas eu repito o cabeçalho criado em Administrador.py pois aquele criado só acessa se eu executar aquele modulo
+            admin = Administrador()  # atribuindo a classe Administrador a uma variavel
+            while True:
+                admin.Cabeçalho()
+                opcao = admin.tratando(
+                    input("Digite o número da sua escolha: ").strip()[0])
+                if opcao == 1:
+                    admin.Cadastrar_Usuário()
+                elif opcao == 2:
+                    admin.Ver_Usuário()
+                elif opcao == 3:
+                    admin.Cadastrar_Plano()
+                elif opcao == 4:
+                    admin.Registrar_Pagamento()
+                elif opcao == 5:
+                    print("Função ainda em construção")
+                elif opcao == 6:
+                    print("Função ainda em construção")
+                elif opcao == 7:
+                    admin.Alterar_Informações_Alunos()
+                elif opcao == 8:
+                    print("Saindo do sistema...")
+                    break
+        else:
+            print("Acesso negado! Você não é um administrador.")
     else:
-        print("Login inválido! Verifique suas credenciais.")
+        print("Usuário não encontrado! Tente novamente.")
 
 
 while True:
-    cabeçalho()
-    opcao = input("Digite o número da sua escolha: ").strip()
-
-    if opcao == "1":
+    opcoes()
+    opcao = input("Digite o número da sua opção: ").strip()
+    if opcao == '1':
         login()
-    elif opcao == "2":
-        print("Sistema de cadastro ainda em desenvolvimento...")
-    elif opcao == "3":
+    elif opcao == '2':
+        print("Função de cadastro ainda não implementada.")
+    elif opcao == '3':
         print("Saindo do sistema...")
         break
     else:
-        print("Opção inválida! Digite um número entre 1 e 3.")
+        print("Opção inválida! Tente novamente.")

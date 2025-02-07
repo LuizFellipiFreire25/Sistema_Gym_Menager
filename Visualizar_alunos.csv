@@ -1,2 +1,3 @@
-ID,Nome,Email,Tipo de plano,Tipo de Plano
-1234,Joao leonardo,joaozinho@gmail.com,,2
+ID,Nome,Email,Tipo de plano,Tipo,Tipo de Plano
+1202,Luiz Fellipi,felipedanifreire@gmail.com,,Administrador,Plano Day Pass
+2024000402,Veronica Silvia,veronicasilviaborges@gmail.com,,Administrador,Plano Teste

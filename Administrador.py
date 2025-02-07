@@ -192,6 +192,8 @@ class Administrador:
                 n = input("Opção inválida digite novamente: ")
 
 
+# aqui em diante garante que o codigo seja executado somente se eu executar Administrador.py (if __name__ == "__main__")
+# para eu chamar as funções da classe Administrador eu tenho que criar o cabeçalho novamente no módulo que eu for chamar, ficará exatamente igual tirando a parte comentada acima
 if __name__ == "__main__":
     admin = Administrador()
     while True:
