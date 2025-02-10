@@ -9,6 +9,7 @@ class Administrador:
         self.arquivo = 'Visualizar_alunos.csv'
         self.planos_arquivo = 'planos.txt'
         self.treinos_arquivo = 'treinos.txt'
+        self.presencas_arquivo = 'presencas.csv'
         # chamando o método que vai tratar a tabela
         self.Carregar_Dados()
 
@@ -65,7 +66,7 @@ class Administrador:
                     'Tipo de Plano': plano, 'Email': email, 'Tipo': tipo}
             self.tabela = self.tabela._append(novo, ignore_index=True)
             self.tabela.loc[self.tabela['Nome'] == nome,
-                            'Tipo de Plano'] = plano if tipo == 'A' else "Nenhum"
+                            'Tipo de Plano'] = plano if tipo == 'L' else "Nenhum"
             self.salvar()
 
     # método responsável por promover a visualização de um aluno
@@ -145,7 +146,51 @@ class Administrador:
             print("Aluno não encontrado!")
 
     # ainda nao sei como vou compor ela
-    # def Registrar_Presença(self):
+    def Registrar_Presença(self):
+        # verificando se exite o aquivo, se existir devo abrir ele
+        if os.path.exists(self.presencas_arquivo):
+            presencas_df = pd.read_csv(self.presencas_arquivo)
+        # se nao existir vou criar ele
+        else:
+            colunas = ['ID', 'Nome', 'Segunda', 'Terça',
+                       'Quarta', 'Quinta', 'Sexta', 'Sábado']
+            presencas_df = pd.DataFrame(columns=colunas)
+            presencas_df.to_csv(self.presencas_arquivo, index=False)
+
+        email = input("Digite o email para registrar presença: ")
+        if email not in self.tabela['Email'].values:
+            print("Aluno não encontrado...")
+            sleep(0.5)
+            return
+
+        # filtrando a linha onde o email é igual ao email fornecido
+        aluno = self.tabela.loc[self.tabela['Email'] == email]
+        # como aluno é um Df contendo a linha onde o email é igual ao email fornecido vou usar o iloc para filtrar o nome e id
+        nome_aluno = aluno.iloc[0]['Nome']
+        id_aluno = aluno.iloc[0]['ID']
+        # Estabelecendo os dias da semana
+        dia_semana = date.today().strftime('%A')
+        # dicionario contendo os dias traduzidos
+        dias_traduzidos = {
+            'Monday': 'Segunda', 'Tuesday': 'Terça', 'Wednesday': 'Quarta',
+            'Thursday': 'Quinta', 'Friday': 'Sexta', 'Saturday': 'Sábado'
+        }
+
+        if dia_semana not in dias_traduzidos:
+            return 'Hoje nao é dia de treino, pois é domingo'
+        # acessando o dicionario na chave do dia atual
+        dia_atual = dias_traduzidos[dia_semana]
+        # adicionando "Presente" para o aluno no dia atual
+        if id_aluno in presencas_df['ID'].values:
+            presencas_df.loc[presencas_df['ID'] ==
+                             id_aluno, dia_atual] = "Presente"
+        # caso seja a vez do aluno na lista de presenças
+        else:
+            novo = {"ID": id_aluno, 'Nome': nome_aluno, dia_atual: "Presente"}
+            presencas_df = presencas_df._append(novo, ignore_index=True)
+
+        presencas_df.to_csv(self.presencas_arquivo, index=False)
+        print("Presença registrada!")
 
     # ainda nao sei como vou compor ela
     # def Gerar_Relatório_Frequência(self):
@@ -155,16 +200,16 @@ class Administrador:
     def Alterar_Informações_Alunos(self):
         # filtrando o aluno pelo nome
         aluno = input(
-            "Digite o nome do aluno que você deseja alterar informções: ")
+            "Digite o nome do aluno ou administrador que você deseja alterar informções: ")
         # verificando se o aluno existe no banco de dados
         if aluno in self.tabela['Nome'].values:
             print("Aluno encontrado!")
             print("Digite as novas informações que serão solicitadas abaixo ou pressione enter para manter as atuais!")
             # solicitando as novas informações
-            id = input("Digite o novo Id do aluno: ").strip()
-            email = input("Digite o novo Email do aluno: ").strip()
+            id = input("Digite o novo Id: ").strip()
+            email = input("Digite o novo Email: ").strip()
             tipo_plano = input(
-                "Digite o novo Tipo de Plano do aluno: ").strip()
+                "Digite o novo Tipo de Plano, (se for adiministrador digite Nenhum): ").strip()
             pagamento = input(
                 "Digite [1] para adicionar 'Pago' ou [2] para adicionar 'Não Pago' ao aluno: ").strip()
             # só vai considerar os campos se for não vazio
@@ -212,7 +257,7 @@ if __name__ == "__main__":
         elif opcao == 4:
             admin.Registrar_Pagamento()
         elif opcao == 5:
-            print("Função ainda em construção")
+            admin.Registrar_Presença()
         elif opcao == 6:
             print("Função ainda em contrução")
         elif opcao == 7:
