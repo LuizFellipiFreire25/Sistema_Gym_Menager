@@ -46,23 +46,26 @@ class Administrador:
     # este é o método responsável por cadastrar os usuários no banco de dados
     def Cadastrar_Usuário(self):
         # pedindo o email do usuario para verificá-lo no banco de dados
-        email = input("Digite o email do aluno: ")
+        email = input("Digite o email: ")
         # verificando se o usuario ja esta cadastrado
         if email in self.tabela['Email'].values:
-            return 'Aluno já cadastrado!'
+            return 'já cadastrado!'
 
         # se nao estiver cadastrado, deve cadastrar
         else:
-            id = input("Digite o ID do aluno: ")
-            nome = input("Digite o Nome do aluno: ")
-            senha = input("Digite uma Senha para o primeiro acesso do aluno: ")
-            plano = input("Digite o tipo de plano do Aluno: ")
+            id = input("Digite o ID: ")
+            nome = input("Digite o Nome: ")
+            senha = input("Digite uma Senha para o primeiro acesso: ")
+            plano = input(
+                "Digite o tipo de plano, (se for Administrador digite Nenhum): ")
             tipo = input(
                 "O usuário será Administrador ou Aluno? (A para Admin, L para Aluno) ").strip().upper()[0]
             tipo = "Administrador" if tipo == "A" else "Aluno"
             novo = {'Nome': nome, 'ID': id,
                     'Tipo de Plano': plano, 'Email': email, 'Tipo': tipo}
             self.tabela = self.tabela._append(novo, ignore_index=True)
+            self.tabela.loc[self.tabela['Nome'] == nome,
+                            'Tipo de Plano'] = plano if tipo == 'A' else "Nenhum"
             self.salvar()
 
     # método responsável por promover a visualização de um aluno
@@ -166,15 +169,15 @@ class Administrador:
                 "Digite [1] para adicionar 'Pago' ou [2] para adicionar 'Não Pago' ao aluno: ").strip()
             # só vai considerar os campos se for não vazio
             if id:
-                self.tabela.loc[self.tabela['Nome'] == aluno, 'ID'] == id
+                self.tabela.loc[self.tabela['Nome'] == aluno, 'ID'] = id
             if email:
-                self.tabela.loc[self.tabela['Nome'] == aluno, 'Email'] == email
+                self.tabela.loc[self.tabela['Nome'] == aluno, 'Email'] = email
             if tipo_plano:
                 self.tabela.loc[self.tabela['Nome'] ==
-                                aluno, 'Tipo de Plano'] == tipo_plano
+                                aluno, 'Tipo de Plano'] = tipo_plano
             if pagamento:
                 self.tabela.loc[self.tabela['Nome'] == aluno,
-                                'Pagamento'] == 'Pago' if pagamento in '1' else 'Não Pago'
+                                'Pagamento'] = 'Pago' if pagamento in '1' else 'Não Pago'
             # salvando as info
             self.salvar()
         else:
