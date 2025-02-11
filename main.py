@@ -47,9 +47,9 @@ def login():
                 elif opcao == 4:
                     admin.Registrar_Pagamento()
                 elif opcao == 5:
-                    print("Função ainda em construção")
+                    admin.Registrar_Presença()
                 elif opcao == 6:
-                    print("Função ainda em construção")
+                    admin.Gerar_Relatório_Frequência()
                 elif opcao == 7:
                     admin.Alterar_Informações_Alunos()
                 elif opcao == 8:

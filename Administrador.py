@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from time import sleep
 from datetime import date
+import matplotlib.pyplot as plt
 
 
 class Administrador:
@@ -145,7 +146,7 @@ class Administrador:
         else:
             print("Aluno não encontrado!")
 
-    # ainda nao sei como vou compor ela
+    # método que gera relatorio da frequencia dos alunos
     def Registrar_Presença(self):
         # verificando se exite o aquivo, se existir devo abrir ele
         if os.path.exists(self.presencas_arquivo):
@@ -192,11 +193,40 @@ class Administrador:
         presencas_df.to_csv(self.presencas_arquivo, index=False)
         print("Presença registrada!")
 
-    # ainda nao sei como vou compor ela
-    # def Gerar_Relatório_Frequência(self):
+    def Gerar_Relatório_Frequência(self):
+        # verificando se existe o arquivo das presenças
+        if not os.path.exists(self.presencas_arquivo):
+            return f"Arquivo de presença nao encontrado"
+
+        # carregando os dados das presenças
+        presencas_df = pd.read_csv(self.presencas_arquivo)
+
+        # contabilizando as presenças por aluno
+        # iloc[:, 2:] seleciona todas as linhas e apartir da terceira coluna, pois as duas primeiras nao sao as presenças
+        # apply(lambda row: ..., axis=1): Aplica uma função a cada linha do DataFrame (o parâmetro axis=1 indica que a operação é feita por linha).
+        # lambda row: row.eq('Presente').sum() verifica os valores igual a presente retronando uma serie de True ou False, axis = 1 aplica linha por linha
+        presencas_df['Total de Presenças'] = presencas_df.iloc[:, 2:].apply(
+            lambda row: row.eq('Presente').sum(), axis=1)
+
+        # salvando o relatório
+        relatorio = 'relatorio_frequencia.csv'
+        presencas_df.to_csv(relatorio, index=False)
+        print("Relatório de frequência gerado com sucesso!")
+
+        # verificando se o usuário deseja ver os gráficos
+        resp = input(
+            "Você deseja visualizar os gráficos de análise? (Digite S para sim e N para não): ").strip().upper()[0]
+        if resp in "N":
+            print("Você optou por nao visualizar os gráficos")
+            sleep(0.5)
+            print("Obrigado!")
+
+        # montando os gráficos
+        grafico = presencas_df.plot(x='Nome', y='Total de Presenças', kind='bar', color='darkblue', figsize=(
+            10, 5), xlabel='Alunos', ylabel='Presenças', title='Gráfico de Presenças')
+        plt.show()
 
     # método responsável por alterar as informações de alunos
-
     def Alterar_Informações_Alunos(self):
         # filtrando o aluno pelo nome
         aluno = input(
@@ -259,7 +289,7 @@ if __name__ == "__main__":
         elif opcao == 5:
             admin.Registrar_Presença()
         elif opcao == 6:
-            print("Função ainda em contrução")
+            admin.Gerar_Relatório_Frequência()
         elif opcao == 7:
             admin.Alterar_Informações_Alunos()
         elif opcao == 8:
@@ -268,6 +298,4 @@ if __name__ == "__main__":
             print("Obrigado!")
             break
 
-# print("revisar o alterrar informações para pago")
-# print("Estudar ultima parte")
-# tenho que separar a parte da senha, da presença e pensar em algo para o pagamento
+# tenho que separar a parte da senha e pensar em algo para o pagamento
