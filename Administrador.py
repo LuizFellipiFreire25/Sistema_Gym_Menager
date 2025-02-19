@@ -51,7 +51,8 @@ class Administrador:
         email = input("Digite o email: ")
         # verificando se o usuario ja esta cadastrado
         if email in self.tabela['Email'].values:
-            return 'já cadastrado!'
+            print("'já cadastrado!'")
+            return
 
         # se nao estiver cadastrado, deve cadastrar
         else:
@@ -67,7 +68,7 @@ class Administrador:
                     'Tipo de Plano': plano, 'Email': email, 'Tipo': tipo}
             self.tabela = self.tabela._append(novo, ignore_index=True)
             self.tabela.loc[self.tabela['Nome'] == nome,
-                            'Tipo de Plano'] = plano if tipo == 'L' else "Nenhum"
+                            'Tipo de Plano'] = plano if tipo == 'Aluno' else "Nenhum"
             self.salvar()
 
     # método responsável por promover a visualização de um aluno

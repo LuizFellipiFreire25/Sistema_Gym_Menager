@@ -14,6 +14,7 @@ class Aluno:
         self.faturas = "faturas.csv"
         self.arquivo_treinos = "treinos.txt"
         self.progresso = "pregresso.csv"
+        self.arquivo_avaliacoes = "Avaliacoes.csv"
 
     def cabecalho(self):
         """método que exibe as opções do cabeçalho para os alunos"""
@@ -70,7 +71,42 @@ class Aluno:
             print(treinos)
 
     def Avaliacao(self):
-        return "função ainda em construção, sera capaz de marcar avaliação com um personal"
+        try:
+            tabela = pd.read_csv("Visualizar_alunos.csv")
+            nome = input("Digite seu nome completo: ").strip().title()
+
+            if tabela[(tabela["Nome"] == nome) & (tabela["Tipo"] == 'Aluno')].empty:
+                return "Erro aluno nao encontrado!"
+
+            else:
+                dias_disponiveis = input(
+                    "Informe o dia disponível na semana ou datas específicas, separando-os por vírgula (Ex: Segunda, Terça ou 12/01/25): ")
+                horarios_disponiveis = input(
+                    "Informe os horários disponíveis, (ex: 18:00): ")
+
+                datas = {
+                    "Nome": [nome],
+                    "Disponibilidade": [dias_disponiveis],
+                    "Horário": [horarios_disponiveis]
+                }
+
+                df_Avaliacao = pd.DataFrame(datas)
+
+                if os.path.exists(self.arquivo_avaliacoes):
+                    df_Avaliacao.to_csv(
+                        self.arquivo_avaliacoes, mode='a', header=False, index=False)
+                    return "Avaliação agendada com sucesso!"
+
+                else:
+                    df_Avaliacao.to_csv(
+                        self.arquivo_avaliacoes, mode='w', header=True, index=False)
+                    return "Avaliação agendada com sucesso!"
+
+        except FileNotFoundError:
+            print('Pasta de dados não encontrada')
+
+        except Exception as e:
+            print(f"Erro: {e}")
 
 
 if __name__ == "__main__":
@@ -82,3 +118,14 @@ if __name__ == "__main__":
             user.Treinos()
         elif opcao == 2:
             user.Treinos_extra()
+        elif opcao == 3:
+            user.Avaliacao()
+        elif opcao == 4:
+            print("Ainda em construção")
+        elif opcao == 5:
+            print("Ainda em construção")
+        elif opcao == 6:
+            print("Ainda em construção")
+        else:
+            print("Saindo do sistema...")
+            break
