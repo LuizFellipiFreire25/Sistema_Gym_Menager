@@ -72,7 +72,7 @@ def login():
                 elif opcao == 3:
                     user.Avaliacao()
                 elif opcao == 4:
-                    print("Ainda em construção")
+                    user.Meu_progresso()
                 elif opcao == 5:
                     print("Ainda em construção")
                 elif opcao == 6:

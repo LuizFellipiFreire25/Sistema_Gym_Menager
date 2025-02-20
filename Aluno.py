@@ -2,7 +2,7 @@ import pandas as pd
 from time import sleep
 import os
 from datetime import datetime
-import random
+import matplotlib.pyplot as plt
 
 
 class Aluno:
@@ -108,6 +108,85 @@ class Aluno:
         except Exception as e:
             print(f"Erro: {e}")
 
+    def Meu_progresso(self):
+        '''metodo que atualiza o progresso do aluno, gera um data frame para os dados e plota gráficos de anáilise'''
+        nome = input("Digite o seu nome: ").strip()
+        # tenteando acessar a tabela principal para ver se o aluno esta cadastrado
+        try:
+            tabela = pd.read_csv("Visualizar_alunos.csv")
+            if tabela[(tabela['Nome'] == nome) & (tabela['Tipo'] == "Aluno")].empty:
+                print("Aluno não encontrado! ")
+                return
+
+        except FileNotFoundError:
+            print("Banco de dados não encontrado!")
+            return
+        # tentando acessar o data frame do progresso dos alunos e atribuindo o nome do aluno para uma variável
+        try:
+            df_progresso = pd.read_csv(self.progresso)
+            aluno_progresso = df_progresso[df_progresso['Nome'] == nome]
+        # se ele nao achar o arquivo, vou iniciar as duas variaveis abaixo como um data fframe
+        except FileNotFoundError:
+            df_progresso = pd.DataFrame()
+            aluno_progresso = pd.DataFrame()
+        # uniciando as variaveis que vou usar, como um dataframe
+        novo_progresso = pd.DataFrame()
+        progresso_atual = pd.DataFrame()
+        # se o aluno da vez estiver com o progresso vazio, vou coletar seus dados, tranformar em data frame e mandar para uma variável
+        if aluno_progresso.empty:
+            print("Você ainda não tem os dados cadastrados no sistema! ")
+            peso = float(input("Digite o peso (Kg): "))
+            altura_str = input("Digite a altura (M): ")
+            altura = float(altura_str.replace(',', '.'))
+            imc = round(peso/(altura**2), 2)
+            dados = {
+                "Nome": [nome],
+                "Altura": [altura],
+                "Peso": [peso],
+                "IMC": [imc],
+                "Data": [datetime.today().strftime('%Y-%m-%d')]
+            }
+            progresso_atual = pd.DataFrame(dados)
+        # se o aluno não estiver com o progresso vazio eu pego o novo peso, filtro a nova altura e faço o mesmo processo anterior
+        else:
+            print("Você ja tem alguns dados cadastrados! ")
+            peso_novo = input("Digite o seu peso atual (Kg): ")
+            altura_novo = aluno_progresso['Altura'].values[0]
+            # Converte os valores para float para garantir que sejam numéricos
+            peso_novo = float(peso_novo.replace(',', '.')) if isinstance(
+                peso_novo, str) else float(peso_novo)
+            # Garante que altura_novo seja uma string antes de substituir e converter para float
+            altura_novo = float(str(altura_novo).replace(',', '.'))
+            imc_novo = round(peso_novo / (altura_novo ** 2), 2)
+
+            novos_dados = {
+                "Nome": [nome],
+                "Altura": [altura_novo],
+                "Peso": [peso_novo],
+                "IMC": [imc_novo],
+                "Data": [datetime.today().strftime('%Y-%m-%d')]
+            }
+            novo_progresso = pd.DataFrame(novos_dados)
+
+        # concat nos permite agrupar mais de um dataframe no mesmo arquivo
+        df_progresso = pd.concat(
+            [df_progresso, progresso_atual, novo_progresso], ignore_index=True)
+        # salvando o dataframe no arquivo principal do progresso
+        df_progresso.to_csv(self.progresso, index=False)
+
+        # plotando os gráficos
+        opcao = input(
+            "Quer visualizar os gráficos? digite S para sim e N para não: ").strip().upper()[0]
+        if opcao == 'S':
+            plt.figure(figsize=(10, 6))
+            df_progresso[df_progresso['Nome'] == nome].plot(kind='bar',
+                                                            x='Data', y='Peso', linestyle='-')
+            plt.title("Gráfico de Análise de evolução do peso (Kg)")
+            plt.xlabel("Data")
+            plt.ylabel("Peso (Kg)")
+            plt.grid(color='darkblue', alpha=0.7)
+            plt.show()
+
 
 if __name__ == "__main__":
     user = Aluno()
@@ -121,7 +200,7 @@ if __name__ == "__main__":
         elif opcao == 3:
             user.Avaliacao()
         elif opcao == 4:
-            print("Ainda em construção")
+            user.Meu_progresso()
         elif opcao == 5:
             print("Ainda em construção")
         elif opcao == 6:
