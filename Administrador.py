@@ -355,4 +355,4 @@ if __name__ == "__main__":
             break
 
 
-# tenho que separar a parte da senha e pensar em algo para o pagamento
+# finishhhhhh
