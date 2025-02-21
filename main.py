@@ -54,6 +54,8 @@ def login():
                 elif opcao == 7:
                     admin.Alterar_Informações_Alunos()
                 elif opcao == 8:
+                    admin.Visualizar_pagos()
+                elif opcao == 9:
                     print("Saindo do sistema...")
                     break
 

@@ -185,6 +185,7 @@ class Aluno:
             plt.xlabel("Data")
             plt.ylabel("Peso (Kg)")
             plt.grid(color='darkblue', alpha=0.7)
+            plt.tight_layout()
             plt.show()
 
 

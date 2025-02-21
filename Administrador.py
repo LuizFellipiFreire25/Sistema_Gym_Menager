@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from time import sleep
-from datetime import date
+from datetime import datetime
 import matplotlib.pyplot as plt
 
 
@@ -11,6 +11,7 @@ class Administrador:
         self.planos_arquivo = 'planos.txt'
         self.treinos_arquivo = 'treinos.txt'
         self.presencas_arquivo = 'presencas.csv'
+        self.arquivo_faturas = 'Faturas.csv'
         # chamando o método que vai tratar a tabela
         self.Carregar_Dados()
 
@@ -40,7 +41,7 @@ class Administrador:
         print('-=' * 30)
         print("Opções: ")
         lista = ['1. Cadastrar Usuário', '2. Ver Usuário', '3. Cadastrar Plano',
-                 '4. Registrar Pagamento', '5. Registrar Presença', '6. Gerar Relatório Frequência', '7. Alterar Informações de Alunos', '8. Sair']
+                 '4. Registrar Pagamento', '5. Registrar Presença', '6. Gerar Relatório Frequência', '7. Alterar Informações de Alunos', '8. Visualizar Pagamentos', '9. Sair']
         for elemento in lista:
             print(elemento)
         print('-=' * 30)
@@ -130,24 +131,76 @@ class Administrador:
 
     # método que registra o pagamento ou nao de cada aluno
     def Registrar_Pagamento(self):
-        # filtrando o aluno pelo email
-        email = input(
-            "Digite o Email do aluno que você quer registrar o pagamento: ")
-        # se o aluno tiver no banco de dados ele registra o pagamento
-        if email in self.tabela['Email'].values:
-            print("Aluno encontrado! ")
-            # adicionando a coluna pago
-            self.tabela.loc[self.tabela['Email']
-                            == email, 'Pagamento'] = 'Pago'
-            # garantindo que os alunos que nao pagaram nao vao estar como pago
-            self.tabela['Pagamento'] = self.tabela['Pagamento'].fillna(
-                "Não Pago")
-            # salvando
-            self.salvar()
+        # verificando se o data frame existe
+        if not os.path.exists(self.arquivo):
+            return 'Erro: Nenhum aluno cadastrado ainda'
+
+        # se existe
         else:
-            print("Aluno não encontrado!")
+            tabela = pd.read_csv(self.arquivo)
+            email = input(
+                "Digite o email do aluno que deseja registrar o pagamento: ").strip()
+
+            # verifica se o aluno existe
+            aluno = tabela[tabela['Email'] == email]
+            if aluno.empty:
+                return 'Aluno nao encontrado'
+
+            else:
+                nome = aluno.iloc[0]['Nome']
+                id_aluno = aluno.iloc[0]['ID']
+
+                # obtendo a data de pagamento e mes de referencia
+                data_pagamento = datetime.today().strftime('%d/%m/%Y')
+                mes_referencia = datetime.today().strftime('%m/%Y')
+
+                print(
+                    f"Registrando pagamento para: {aluno}, ID: {id_aluno}, na data: {data_pagamento}")
+
+                # verificando se já existe o arquivo das faturas
+                if os.path.exists(self.arquivo_faturas):
+                    faturas_df = pd.read_csv(self.arquivo_faturas)
+
+                # se nao existe vou criá-lo
+                else:
+                    colunas = ['Nome', 'Email', 'ID', 'Mês',
+                               'Data de pagamento', 'Status']
+                    faturas_df = pd.DataFrame(columns=colunas)
+
+                # verificando se ja foi pago neste mes
+                filtro = (faturas_df['Email'] == email) & (
+                    faturas_df['Mês'] == mes_referencia)
+
+                # usando any para ver se o filtro retornou True
+                if filtro.any():
+                    return "Pagamento Já Registrado para o mês!"
+                # se retornar False
+                else:
+                    nova_fatura = {
+                        "Email": email,
+                        "Nome": nome,
+                        "ID": id_aluno,
+                        "Mês": mes_referencia,
+                        "Data de pagamento": data_pagamento,
+                        "Status": "Pago"
+                    }
+                    faturas_df = faturas_df._append(
+                        nova_fatura, ignore_index=True)
+                    # salvando as informações no dataframe de faturas
+                    faturas_df.to_csv(self.arquivo_faturas, index=False)
+                    print(
+                        f"Pagamento registrado com sucesso para {aluno}, no mes {mes_referencia}")
 
     # método que gera relatorio da frequencia dos alunos
+    def Visualizar_pagos(self):
+        # primeiro ver se df exitse
+        if os.path.exists(self.arquivo_faturas):
+            tabela = pd.read_csv(self.arquivo_faturas)
+            print("Arquivo das faturas...")
+            print(tabela)
+        else:
+            return "Não existe banco de dados!"
+
     def Registrar_Presença(self):
         # verificando se exite o aquivo, se existir devo abrir ele
         if os.path.exists(self.presencas_arquivo):
@@ -171,7 +224,7 @@ class Administrador:
         nome_aluno = aluno.iloc[0]['Nome']
         id_aluno = aluno.iloc[0]['ID']
         # Estabelecendo os dias da semana
-        dia_semana = date.today().strftime('%A')
+        dia_semana = datetime.today().strftime('%A')
         # dicionario contendo os dias traduzidos
         dias_traduzidos = {
             'Monday': 'Segunda', 'Tuesday': 'Terça', 'Wednesday': 'Quarta',
@@ -263,7 +316,7 @@ class Administrador:
         while True:
             try:
                 n = int(n)
-                if n in [1, 2, 3, 4, 5, 6, 7, 8]:
+                if n in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
                     return n
                 else:
                     n = input("Opção Inválida, digite novamente de 1 a 8: ")
@@ -294,9 +347,12 @@ if __name__ == "__main__":
         elif opcao == 7:
             admin.Alterar_Informações_Alunos()
         elif opcao == 8:
+            admin.Visualizar_pagos()
+        elif opcao == 9:
             print("Saindo do sistema...")
             sleep(1)
             print("Obrigado!")
             break
+
 
 # tenho que separar a parte da senha e pensar em algo para o pagamento
