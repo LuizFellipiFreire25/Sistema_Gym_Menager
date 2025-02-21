@@ -76,7 +76,7 @@ def login():
                 elif opcao == 4:
                     user.Meu_progresso()
                 elif opcao == 5:
-                    print("Ainda em construção")
+                    user.Faturas()
                 elif opcao == 6:
                     print("Ainda em construção")
                 else:

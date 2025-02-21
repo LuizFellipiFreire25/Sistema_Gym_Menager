@@ -11,7 +11,7 @@ class Aluno:
         # self.nome = nome
         self.dados_pessoais = "dados_alunos.csv"
         self.pagamento = False
-        self.faturas = "faturas.csv"
+        self.faturas = "Faturas.csv"
         self.arquivo_treinos = "treinos.txt"
         self.progresso = "pregresso.csv"
         self.arquivo_avaliacoes = "Avaliacoes.csv"
@@ -188,6 +188,39 @@ class Aluno:
             plt.tight_layout()
             plt.show()
 
+    def Faturas(self):
+        # verificando se existe o arquivo da fatura
+        if os.path.exists(self.faturas):
+            tabela = pd.read_csv(self.faturas)
+
+        else:
+            return "Não existe o arquivo das faturas"
+
+        email = input("Digite seu email: ").strip()
+        sleep(0.5)
+        print("Gerando suas faturas...")
+        sleep(1)
+
+        # filtrando o mes atual
+        mes_atual = datetime.today().strftime('%m/%Y')
+
+        # filtrando a linha correspondente ao email e mes atuais
+        fatura = tabela[(tabela['Email'] == email) &
+                        (tabela['Mês'] == mes_atual)]
+
+        # verificando se tem fatura registrada no mes atual para o aluno
+        if fatura.empty:
+            print(
+                f"Olá, não encontramos pagamento registrado para o mês: {mes_atual}")
+            print("Por favor, verifique sua situação com a Adiministração!")
+            return
+
+        else:
+            nome = fatura.iloc[0]['Nome']
+            status = fatura.iloc[0]['Status']
+            print(
+                f"Olá, {nome}. Sua fatura referente ao mês {mes_atual} esta com o Status: {status}")
+
 
 if __name__ == "__main__":
     user = Aluno()
@@ -203,7 +236,7 @@ if __name__ == "__main__":
         elif opcao == 4:
             user.Meu_progresso()
         elif opcao == 5:
-            print("Ainda em construção")
+            user.Faturas()
         elif opcao == 6:
             print("Ainda em construção")
         else:
