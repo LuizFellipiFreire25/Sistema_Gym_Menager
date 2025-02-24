@@ -61,10 +61,12 @@ def funcoes_aluno():
         elif opcao == 3:
             user.Avaliacao()
         elif opcao == 4:
-            user.Meu_progresso()
+            user.Ver_status_avaliacao()
         elif opcao == 5:
-            user.Faturas()
+            user.Meu_progresso()
         elif opcao == 6:
+            user.Faturas()
+        elif opcao == 7:
             print("Ainda em construção")
         else:
             print("Saindo do sistema...")

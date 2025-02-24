@@ -61,10 +61,16 @@ class Administrador:
             nome = input("Digite o Nome: ")
             senha = input("Digite uma Senha para o primeiro acesso: ")
             plano = input(
-                "Digite o tipo de plano, (se for Administrador digite Nenhum): ")
+                "Digite o tipo de plano, (se for Administrador ou personal digite Nenhum): ")
             tipo = input(
-                "O usuário será Administrador ou Aluno? (A para Admin, L para Aluno) ").strip().upper()[0]
-            tipo = "Administrador" if tipo == "A" else "Aluno"
+                "O usuário será Administrador, Personal ou Aluno? (digite A para Admin, L para Aluno e P para personal) ").strip().upper()[0]
+            if tipo == "A":
+                tipo = "Adiministrador"
+            elif tipo == "L":
+                tipo = 'Aluno'
+            elif tipo == 'P':
+                tipo = 'Personal'
+
             novo = {'Nome': nome, 'ID': id,
                     'Tipo de Plano': plano, 'Email': email, 'Tipo': tipo}
             self.tabela = self.tabela._append(novo, ignore_index=True)

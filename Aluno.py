@@ -22,8 +22,8 @@ class Aluno:
         print("              Sistema do aluno, Seja bem vindo!")
         print("-="*30)
         print("Opções: ")
-        lista = ['1- Treinos', '2- Treinos Extra', '3- Avaliações',
-                 '4- Meu progresso', '5- Faturas', '6- Arquivos', '7- Sair']
+        lista = ['1- Treinos', '2- Treinos Extra', '3- Avaliações', '4- Ver Status de avaliação',
+                 '5- Meu progresso', '6- Faturas', '7- Arquivos', '8- Sair']
         for opções in lista:
             print(opções)
         print("-="*30)
@@ -107,6 +107,35 @@ class Aluno:
 
         except Exception as e:
             print(f"Erro: {e}")
+
+    def Ver_status_avaliacao(self):
+        # verificando se o df de avaliação existe
+        if not os.path.exists(self.arquivo_avaliacoes):
+            print("Não existe o arquivo de avaliações! ")
+            return
+        # se existe
+        tabela = pd.read_csv(self.arquivo_avaliacoes)
+        nome_aluno = input(
+            "Digite seu nome para visualizar o Status de avaliação: ").strip().title()
+
+        # verificando se o aluno existe no df de avaliações
+        aluno_info = tabela[tabela['Nome'] == nome_aluno].iloc[0]
+
+        if aluno_info.empty:
+            print("Não encontramos seu nome nos dados de avaliações, provavelmente você ainda não marcou uma avaliação!")
+            return
+
+        if nome_aluno not in aluno_info.values:
+            print("Não encontramos seu nome nos dados de avaliações, provavelmente você ainda não marcou uma avaliação!")
+            return
+
+        # se existe
+        print("Vamos exibir seu status abaixo: ")
+        sleep(0.5)
+        if pd.isna(aluno_info["Status"]):
+            print("Sua solicitação ainda não foi respondida por um personal!")
+        else:
+            print(aluno_info['Status'])
 
     def Meu_progresso(self):
         '''metodo que atualiza o progresso do aluno, gera um data frame para os dados e plota gráficos de anáilise'''
@@ -234,10 +263,12 @@ if __name__ == "__main__":
         elif opcao == 3:
             user.Avaliacao()
         elif opcao == 4:
-            user.Meu_progresso()
+            user.Ver_status_avaliacao()
         elif opcao == 5:
-            user.Faturas()
+            user.Meu_progresso()
         elif opcao == 6:
+            user.Faturas()
+        elif opcao == 7:
             print("Ainda em construção")
         else:
             print("Saindo do sistema...")
