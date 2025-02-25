@@ -139,7 +139,7 @@ class Aluno:
 
     def Meu_progresso(self):
         '''metodo que atualiza o progresso do aluno, gera um data frame para os dados e plota gráficos de anáilise'''
-        nome = input("Digite o seu nome: ").strip()
+        nome = input("Digite o seu nome: ").strip().title()
         # tenteando acessar a tabela principal para ver se o aluno esta cadastrado
         try:
             tabela = pd.read_csv("Visualizar_alunos.csv")
@@ -216,6 +216,7 @@ class Aluno:
             plt.grid(color='darkblue', alpha=0.7)
             plt.tight_layout()
             plt.show()
+            return
 
     def Faturas(self):
         # verificando se existe o arquivo da fatura
