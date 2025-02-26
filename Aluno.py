@@ -15,6 +15,9 @@ class Aluno:
         self.arquivo_treinos = "treinos.txt"
         self.progresso = "pregresso.csv"
         self.arquivo_avaliacoes = "Avaliacoes.csv"
+        self.arquivo = 'Visualizar_alunos.csv'
+        self.treinos_personalizados = "treinos_personalizados.csv"
+        self.treinos = "treinos.txt"
 
     def cabecalho(self):
         """método que exibe as opções do cabeçalho para os alunos"""
@@ -29,38 +32,37 @@ class Aluno:
         print("-="*30)
 
     def Treinos(self):
-        """método que atribui para o dia atual que o usuario esta logando um pacote específico de treinos
-        primeiro estamos filtrando o dia da semana, depois estamos atribuindo para cada dia um tipo de treino do banco de dados, depois usamos o get para 
-        "pegar" as informações do dia da semana no dicionario"""
-        dia_da_semana = datetime.today().strftime("%A")
+        '''método que mostra para o aluno o treino que foi inferido para ele'''
+        # verificando se existe os arquivos
+        if not os.path.exists(self.arquivo):
+            print("Arquivo principal não encontrado! ")
+            return
 
-        categorias = {
-            "Monday": "Hipertrofia - Treino A - Peito e Tríceps",
-            "Tuesday": "Resistência - Treino Circuito 1",
-            "Wednesday": "Emagrecimento - Treino HIIT 1",
-            "Thursday": "Hipertrofia - Treino B - Costas e Bíceps",
-            "Friday": "Resistência - Treino Circuito 2",
-            "Saturday": "Hipertrofia - Treino C - Pernas",
-            "Sunday": "Mobilidade - Treino de Alongamento 1"
-        }
-        treino_sugerido = categorias.get(dia_da_semana)
-        print(f"Treino Suguerido para hoje: {dia_da_semana}:{treino_sugerido}")
-        sleep(1)
+        if not os.path.exists(self.treinos_personalizados):
+            print("Arquivos de treinos personalizados não encontrado! ")
+            return
 
-        try:
-            with open(self.arquivo_treinos, 'r', encoding='UTF-8') as file:
+        # vendo se se o aluno existe no arquivo de treinos personalizados
+        nome_aluno = input("Digite seu nome: ").strip().title()
+        tabela = pd.read_csv(self.treinos_personalizados)
+
+        if nome_aluno in tabela['Nome'].values:
+            aluno_infos = tabela[tabela['Nome'] == nome_aluno].iloc[-1]
+            print(f"\nOs treinos Atribuídos para {nome_aluno} são: \n")
+            sleep(0.5)
+            treino_nome = aluno_infos['Treino']
+            print()
+            with open(self.treinos, 'r', encoding='UTF-8') as file:
                 treinos = file.read().split("# ")
 
             for treino in treinos:
-                if treino_sugerido.split(" - ")[1] in treino:
-                    print(f"{treino.strip()}")
+                if treino_nome in treino:
+                    print(treino)
                     return
 
-        except FileNotFoundError:
-            print("Erro! O Banco de dados nao foi encontrado...")
-
-        except Exception as e:
-            print(f"Erro: {e}")
+        else:
+            print("Aluno não encontrado!")
+            return
 
     def Treinos_extra(self):
         """método que o aluno visualiza todos os treinos do banco de dados"""

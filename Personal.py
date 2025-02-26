@@ -2,16 +2,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from time import sleep
 import os
+from datetime import datetime
 
 
 class Personal:
     def __init__(self):
+        self.arquivo = 'Visualizar_alunos.csv'
         self.avaliacoes = "Avaliacoes.csv"
         self.progresso = "pregresso.csv"
         self.presencas = "presencas.csv"
         self.treinos_personalizados = "treinos_personalizados.csv"
         self.anotacoes = "anotacoes_personal.csv"
         self.relatorio_frequencia = "relatorio_frequencia.csv"
+        self.treinos = "treinos.txt"
 
     def cabecalho(self):
         print("-=" * 30)
@@ -154,5 +157,75 @@ class Personal:
         print(f"Presenças de {nome_aluno}")
         print(info_aluno)
 
+    def Atribuir_treinos_personalizados(self):
+        # verificando se o arquivo dos alunos existe
+        if not os.path.exists(self.arquivo):
+            print("Arquivo de banco de dados não encontrado! ")
+            return
 
-Personal().Visualizar_presencas()
+        # se existe
+        tabela = pd.read_csv(self.arquivo)
+        nome_personal = input("Personal, digite o seu nome: ").strip().title()
+        if nome_personal not in tabela["Nome"].values:
+            print("Não encontramos você no banco de dados")
+            return
+
+        nome_aluno = input(
+            "Digite o nome do aluno que você deseja atribuir um treino: ").strip().title()
+
+        if nome_aluno not in tabela['Nome'].values:
+            print("Aluno não encontrado!")
+            return
+
+        # verificando se o arquivo de treino existe
+        if not os.path.exists(self.treinos):
+            print("Banco de dados dos treinos não foi encontrado! ")
+            return
+
+        print("\nTreinos disponiveis: \n")
+
+        # exibindo os treinos
+        with open(self.treinos, 'r', encoding='UTF-8') as file:
+            treinos = file.read().split("# ")
+
+        # vou agora fazer um for para percorrer a lista de treinos
+        # basicamente o enumerate vai pegar a partir da segunda linha ignorando a primeira vazia e o enumerate começará em 1
+        for i, treino in enumerate(treinos[1:], start=1):
+            # aqui vou pegar somente o primeiro elemento separado por \n, ou seja somente o nome do treino
+            print(f"{i}. {treino.split('\n')[0]}")
+
+        # agora vou pedir um treino
+        try:
+            escolha = int(
+                input(f"Digite o numero do treino escolhido para o {nome_aluno}: "))
+            # verificando se a escolha nao ultrapassa o limite dos treinos
+            if escolha < 1 or escolha > len(treinos) - 1:
+                print("Erro: Escolha inválida")
+                return
+            escolha = treinos[escolha].strip()
+
+        except ValueError:
+            print("Erro: Digite um número inteiro válido! ")
+            return
+
+        # agora vou criar o df dos treinos personalizados
+        treino_info = {
+            "Nome": nome_aluno,
+            "Treino": escolha.split('\n')[0],  # pegando somente o titulo
+            "Data de atribuição": datetime.today().strftime('%d/%m/%Y'),
+            "Atribuido por": nome_personal
+        }
+
+        if os.path.exists(self.treinos_personalizados):
+            tabela = pd.read_csv(self.treinos_personalizados)
+            tabela = tabela._append(treino_info, ignore_index=True)
+        else:
+            tabela = pd.DataFrame([treino_info])
+
+        tabela.to_csv(self.treinos_personalizados, index=False)
+        print(
+            f"\nTreino: '{treino_info['Treino']}' atribuido com sucesso para {nome_aluno}")
+
+
+Personal().Atribuir_treinos_personalizados()
+# faltando somente a ultima função, que vai interagir com a ultima função dos alunos
