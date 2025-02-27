@@ -226,6 +226,39 @@ class Personal:
         print(
             f"\nTreino: '{treino_info['Treino']}' atribuido com sucesso para {nome_aluno}")
 
+    def tratando(self, n):
+        while True:
+            try:
+                n = int(n)
+                if n in [1, 2, 3, 4, 5, 6]:
+                    return n
+                else:
+                    n = input("Opção Inválida, digite novamente de 1 a 6: ")
+            except (ValueError, TypeError):
+                n = input("Opção inválida digite novamente: ")
 
-Personal().Atribuir_treinos_personalizados()
+    # def Anotacoes_sobre_alunos(self):
+
+
+if __name__ == "__main__":
+    while True:
+        per = Personal()
+        per.cabecalho()
+        opcao = per.tratando(
+            input("Digite o número da sua opção: ").strip()[0])
+        if opcao == 1:
+            per.acessar_avaliacoes()
+        elif opcao == 2:
+            per.Visualizar_progresso_alunos()
+        elif opcao == 3:
+            per.Visualizar_presencas()
+        elif opcao == 4:
+            per.Atribuir_treinos_personalizados()
+        elif opcao == 5:
+            print("Ainda em contrucao...")
+        else:
+            print("Saindo do sistema...")
+            sleep(1)
+            print("Obrigado!")
+
 # faltando somente a ultima função, que vai interagir com a ultima função dos alunos

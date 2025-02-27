@@ -3,6 +3,7 @@ import os
 from Administrador import Administrador
 from time import sleep
 from Aluno import Aluno
+from Personal import Personal
 
 
 def opcoes():
@@ -73,6 +74,28 @@ def funcoes_aluno():
             break
 
 
+def funcoes_personal():
+    while True:
+        per = Personal()
+        per.cabecalho()
+        opcao = per.tratando(
+            input("Digite o número da sua opção: ").strip()[0])
+        if opcao == 1:
+            per.acessar_avaliacoes()
+        elif opcao == 2:
+            per.Visualizar_progresso_alunos()
+        elif opcao == 3:
+            per.Visualizar_presencas()
+        elif opcao == 4:
+            per.Atribuir_treinos_personalizados()
+        elif opcao == 5:
+            print("Ainda em contrucao...")
+        else:
+            print("Saindo do sistema...")
+            sleep(1)
+            print("Obrigado!")
+
+
 def login():
     # verificando se o arquivo existe
     if not os.path.exists('Visualizar_alunos.csv'):
@@ -91,6 +114,9 @@ def login():
 
         elif usuario['Tipo'] == 'Aluno':
             funcoes_aluno()
+
+        elif usuario['Tipo'] == 'Personal':
+            funcoes_personal()
 
         else:
             print("Acesso negado!")
@@ -143,4 +169,4 @@ while True:
     else:
         print("Opção inválida! Tente novamente.")
 
-# tenho que separar a parte da senha para login e cadastro e futuramente chamar as funções do personal
+# tenho que separar a parte da senha para login e cadastro
