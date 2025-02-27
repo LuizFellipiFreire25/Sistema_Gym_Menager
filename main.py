@@ -67,7 +67,7 @@ def funcoes_aluno():
         elif opcao == 6:
             user.Faturas()
         elif opcao == 7:
-            print("Ainda em construção")
+            user.arquivos()
         else:
             print("Saindo do sistema...")
             break

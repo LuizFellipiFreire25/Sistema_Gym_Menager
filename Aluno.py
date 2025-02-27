@@ -18,6 +18,7 @@ class Aluno:
         self.arquivo = 'Visualizar_alunos.csv'
         self.treinos_personalizados = "treinos_personalizados.csv"
         self.treinos = "treinos.txt"
+        self.duvidas_arquivos = 'duvidas_alunos.csv'
 
     def cabecalho(self):
         """método que exibe as opções do cabeçalho para os alunos"""
@@ -253,6 +254,46 @@ class Aluno:
             print(
                 f"Olá, {nome}. Sua fatura referente ao mês {mes_atual} esta com o Status: {status}")
 
+    def arquivos(self):
+        nome = input("Digite seu nome completo: ").strip().title()
+
+        # verificando se existe o arquivo de duvidas
+        if os.path.exists(self.duvidas_arquivos):
+            tabela = pd.read_csv(self.duvidas_arquivos)
+            # verificando se tem duvidas pendentes
+            pendente = tabela[(tabela["Nome"] == nome) &
+                              (tabela["Status"] == 'Pendente')]
+            # verificando se o aluno nao tem nenhuma duvida pendente
+            if not pendente.empty:
+                print(
+                    "Você ja tem uma duvida pendente, aguarde o personal responder sua duvida antes de enviar outra...")
+                return
+        else:
+            tabela = pd.DataFrame(
+                columns=['Nome', 'Data', 'Dúvida', 'Anexo', 'Resposta', 'Status'])
+
+        # coletando uma dúvida e verificando se é não vazia
+        duvida = input("Digite sua dúvida: ").strip()
+
+        if not duvida:
+            print("Não é permitido dúvidas vazias!")
+            return
+
+        # criando a nova duvida no df
+        nova = {
+            "Nome": nome,
+            "Data": datetime.today().strftime("%d/%m/%Y"),
+            "Dúvida": duvida,
+            "Resposta": 'Agurdando Resposta do Personal',
+            "Status": 'Pendente'
+        }
+
+        # salvando tudo
+        tabela = tabela._append(nova, ignore_index=True)
+        tabela.to_csv(self.duvidas_arquivos, index=False)
+
+        print("Sua dúvida foi enviada para o personal")
+
 
 if __name__ == "__main__":
     user = Aluno()
@@ -272,9 +313,9 @@ if __name__ == "__main__":
         elif opcao == 6:
             user.Faturas()
         elif opcao == 7:
-            print("Ainda em construção")
+            user.arquivos()
         else:
             print("Saindo do sistema...")
             break
 
-# faltando somente a ultima função
+# faltando somente a senha
