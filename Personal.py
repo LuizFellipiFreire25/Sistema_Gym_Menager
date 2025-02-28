@@ -15,6 +15,7 @@ class Personal:
         self.anotacoes = "anotacoes_personal.csv"
         self.relatorio_frequencia = "relatorio_frequencia.csv"
         self.treinos = "treinos.txt"
+        self.duvidas = 'duvidas_alunos.csv'
 
     def cabecalho(self):
         print("-=" * 30)
@@ -237,7 +238,79 @@ class Personal:
             except (ValueError, TypeError):
                 n = input("Opção inválida digite novamente: ")
 
-    # def Anotacoes_sobre_alunos(self):
+    def Anotacoes_sobre_alunos(self):
+        nome_personal = input("Personal, digite seu nome: ").strip().title()
+        arquivo = pd.read_csv(self.arquivo)
+        if nome_personal not in arquivo.values:
+            print(f"{nome_personal}, não encontramos o seu nome cadastrado! ")
+            sleep(1)
+            return
+
+        # verificando se o arquivo de duvidas existe
+        if not os.path.exists(self.duvidas):
+            print("Arquivo das dúvidas não existe!")
+            return
+
+        # se existe vou filtrar as duvidas que ainda estão pendentes
+        tabela = pd.read_csv(self.duvidas)
+        duvidas_pendentes = tabela[tabela['Status'] == 'Pendente']
+
+        # verificando se ha duvidas pendentes
+        if duvidas_pendentes.empty:
+            print("Não há dúvidas pendentes...")
+            return
+
+        # se nao houver, vou exibir as duvidas
+        print("\nDúvidas pendentes: ")
+        print(duvidas_pendentes[['Nome', 'Data', 'Dúvida']])
+
+        # perguntando o aluno que o personal deseja responder
+        opcao = input(
+            "Deseja responder alguma dúvida? (S/N): ").strip().upper()[0]
+        nome_aluno = input(
+            "Digite o nome do aluno que você deseja responder (Se quiser cancelar a operação digite Cancelar): ").strip().title()
+
+        if opcao == 'N':
+            print("Saindo...")
+            sleep(1)
+            return
+
+        if nome_aluno == 'Cancelar':
+            print("Saindo...")
+            sleep(1)
+            return
+
+        # verificando se nao encontra a duvida do aluno
+        if nome_aluno not in duvidas_pendentes["Nome"].values:
+            print("Aluno não encontrado ou não há dúvida pendente...")
+            sleep(1)
+            return
+
+        # obtendo a duvida
+        duvida = duvidas_pendentes[duvidas_pendentes['Nome']
+                                   == nome_aluno]
+        print(f"Dúvida do aluno {nome_aluno}: {duvida['Dúvida']}")
+
+        # Obtendo a resposta
+        resposta = input(
+            f"Digite a resposta para o dúvida do aluno {nome_aluno}: ").strip()
+
+        sleep(1)
+        # verificando se é nao vazio
+        if not resposta:
+            print("Não é permitido dúvidas vazias!")
+            sleep(1)
+            return
+
+        # se for nao vazia vou atualizar o df
+        tabela.loc[tabela['Nome'] == nome_aluno, 'Resposta'] = resposta
+        tabela.loc[tabela['Nome'] == nome_aluno,
+                   'Status'] = f'Respondido pelo personal: {nome_personal}'
+
+        # salvando as mudanças
+        tabela.to_csv(self.duvidas, index=False)
+
+        print(f"\nResposta enviada para {nome_aluno}, obrigado!")
 
 
 if __name__ == "__main__":
@@ -255,10 +328,11 @@ if __name__ == "__main__":
         elif opcao == 4:
             per.Atribuir_treinos_personalizados()
         elif opcao == 5:
-            print("Ainda em contrucao...")
+            per.Anotacoes_sobre_alunos()
         else:
             print("Saindo do sistema...")
             sleep(1)
             print("Obrigado!")
+            break
 
-# faltando somente a ultima função, que vai interagir com a ultima função dos alunos
+# faltando somente a senha

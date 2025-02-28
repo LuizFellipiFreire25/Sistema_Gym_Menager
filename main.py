@@ -75,6 +75,8 @@ def funcoes_aluno():
 
 
 def funcoes_personal():
+    print("Login bem-sucedido! Acessando o sistema do Personal...")
+    sleep(0.5)
     while True:
         per = Personal()
         per.cabecalho()
@@ -89,11 +91,12 @@ def funcoes_personal():
         elif opcao == 4:
             per.Atribuir_treinos_personalizados()
         elif opcao == 5:
-            print("Ainda em contrucao...")
+            per.Anotacoes_sobre_alunos()
         else:
             print("Saindo do sistema...")
             sleep(1)
             print("Obrigado!")
+            break
 
 
 def login():

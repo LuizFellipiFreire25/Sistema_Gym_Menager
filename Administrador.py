@@ -65,7 +65,7 @@ class Administrador:
             tipo = input(
                 "O usuário será Administrador, Personal ou Aluno? (digite A para Admin, L para Aluno e P para personal) ").strip().upper()[0]
             if tipo == "A":
-                tipo = "Adiministrador"
+                tipo = "Administrador"
             elif tipo == "L":
                 tipo = 'Aluno'
             elif tipo == 'P':
