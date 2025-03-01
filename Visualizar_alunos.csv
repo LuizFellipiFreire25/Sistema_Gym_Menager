@@ -1,4 +1,6 @@
-ID,Nome,Email,Tipo de plano,Tipo,Tipo de Plano
-2023005790,Luiz Fellipi,felipedanifreire@gmail.com,,Administrador,Nenhum
-2024000402,Veve,veronicasilvia@gmail.com,,Aluno,Plano Day Pass
-1502,kayllany,kaki@gmail.com,,Aluno,Plano Teste
+ID,Nome,Email,Tipo de plano,Tipo,Senha,Tipo de Plano
+1515,Luiz Fellipi,felipedanifreire@gmail.com,,Aluno,luizinho1414,Plano Day Pass
+1414,Veronica Silvia Borges,veve@gmail.com,,Administrador,@Amarelo123,Nenhum
+5888,Rogerio Santos,dada@gmail.com,,Personal,dadarogerio13,Nenhum
+7911,Ana Souza Dias,aninha@gmail.com,,Aluno,aninha123,Plano Day Pass
+1008,João Pereira Silva,joaozinho@gmail.com,,Aluno,joaozinho123,Plano Day Pass

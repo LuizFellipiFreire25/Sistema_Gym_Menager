@@ -1,7 +1,9 @@
 import pandas as pd
 import os
 from time import sleep
-from datetime import date
+from datetime import datetime
+import matplotlib.pyplot as plt
+import random
 
 
 class Administrador:
@@ -9,6 +11,8 @@ class Administrador:
         self.arquivo = 'Visualizar_alunos.csv'
         self.planos_arquivo = 'planos.txt'
         self.treinos_arquivo = 'treinos.txt'
+        self.presencas_arquivo = 'presencas.csv'
+        self.arquivo_faturas = 'Faturas.csv'
         # chamando o método que vai tratar a tabela
         self.Carregar_Dados()
 
@@ -38,7 +42,7 @@ class Administrador:
         print('-=' * 30)
         print("Opções: ")
         lista = ['1. Cadastrar Usuário', '2. Ver Usuário', '3. Cadastrar Plano',
-                 '4. Registrar Pagamento', '5. Registrar Presença', '6. Gerar Relatório Frequência', '7. Alterar Informações de Alunos', '8. Sair']
+                 '4. Registrar Pagamento', '5. Registrar Presença', '6. Gerar Relatório Frequência', '7. Alterar Informações de Alunos', '8. Visualizar Pagamentos', '9. Redefinir Senha', '10. Sair']
         for elemento in lista:
             print(elemento)
         print('-=' * 30)
@@ -46,23 +50,42 @@ class Administrador:
     # este é o método responsável por cadastrar os usuários no banco de dados
     def Cadastrar_Usuário(self):
         # pedindo o email do usuario para verificá-lo no banco de dados
-        email = input("Digite o email do aluno: ")
+        email = input("Digite o email: ")
         # verificando se o usuario ja esta cadastrado
         if email in self.tabela['Email'].values:
-            return 'Aluno já cadastrado!'
+            print("'já cadastrado!'")
+            return
 
         # se nao estiver cadastrado, deve cadastrar
         else:
-            id = input("Digite o ID do aluno: ")
-            nome = input("Digite o Nome do aluno: ")
-            senha = input("Digite uma Senha para o primeiro acesso do aluno: ")
-            plano = input("Digite o tipo de plano do Aluno: ")
+            # primeiro vou gerar um ID aleatório para o novo cadastrado!
+            while True:
+                id = random.randint(1000, 9999)
+                if id not in self.tabela['ID'].values:
+                    break
+
+            nome = input("Digite o Nome: ").strip().title()
+            senha = input("Digite uma Senha: ").strip()
+            plano = input(
+                "Digite o tipo de plano, (se for Administrador ou personal digite Nenhum): ")
             tipo = input(
-                "O usuário será Administrador ou Aluno? (A para Admin, L para Aluno) ").strip().upper()[0]
-            tipo = "Administrador" if tipo == "A" else "Aluno"
-            novo = {'Nome': nome, 'ID': id,
+                "O usuário será Administrador, Personal ou Aluno? (digite A para Admin, L para Aluno e P para personal) ").strip().upper()[0]
+            if tipo == "A":
+                tipo = "Administrador"
+            elif tipo == "L":
+                tipo = 'Aluno'
+            elif tipo == 'P':
+                tipo = 'Personal'
+
+            print("Gerando um ID...")
+            sleep(2)
+            print(f"{nome} seu ID é: {id}")
+            sleep(2)
+            novo = {'Nome': nome, 'ID': id, 'Senha': senha,
                     'Tipo de Plano': plano, 'Email': email, 'Tipo': tipo}
             self.tabela = self.tabela._append(novo, ignore_index=True)
+            self.tabela.loc[self.tabela['Nome'] == nome,
+                            'Tipo de Plano'] = plano if tipo == 'Aluno' else "Nenhum"
             self.salvar()
 
     # método responsável por promover a visualização de um aluno
@@ -124,57 +147,182 @@ class Administrador:
 
     # método que registra o pagamento ou nao de cada aluno
     def Registrar_Pagamento(self):
-        # filtrando o aluno pelo email
-        email = input(
-            "Digite o Email do aluno que você quer registrar o pagamento: ")
-        # se o aluno tiver no banco de dados ele registra o pagamento
-        if email in self.tabela['Email'].values:
-            print("Aluno encontrado! ")
-            # adicionando a coluna pago
-            self.tabela.loc[self.tabela['Email']
-                            == email, 'Pagamento'] = 'Pago'
-            # garantindo que os alunos que nao pagaram nao vao estar como pago
-            self.tabela['Pagamento'] = self.tabela['Pagamento'].fillna(
-                "Não Pago")
-            # salvando
-            self.salvar()
+        # verificando se o data frame existe
+        if not os.path.exists(self.arquivo):
+            return 'Erro: Nenhum aluno cadastrado ainda'
+
+        # se existe
         else:
-            print("Aluno não encontrado!")
+            tabela = pd.read_csv(self.arquivo)
+            email = input(
+                "Digite o email do aluno que deseja registrar o pagamento: ").strip()
 
-    # ainda nao sei como vou compor ela
-    # def Registrar_Presença(self):
+            # verifica se o aluno existe
+            aluno = tabela[tabela['Email'] == email]
+            if aluno.empty:
+                return 'Aluno nao encontrado'
 
-    # ainda nao sei como vou compor ela
-    # def Gerar_Relatório_Frequência(self):
+            else:
+                nome = aluno.iloc[0]['Nome']
+                id_aluno = aluno.iloc[0]['ID']
+
+                # obtendo a data de pagamento e mes de referencia
+                data_pagamento = datetime.today().strftime('%d/%m/%Y')
+                mes_referencia = datetime.today().strftime('%m/%Y')
+
+                print(
+                    f"Registrando pagamento para: {aluno}, ID: {id_aluno}, na data: {data_pagamento}")
+
+                # verificando se já existe o arquivo das faturas
+                if os.path.exists(self.arquivo_faturas):
+                    faturas_df = pd.read_csv(self.arquivo_faturas)
+
+                # se nao existe vou criá-lo
+                else:
+                    colunas = ['Nome', 'Email', 'ID', 'Mês',
+                               'Data de pagamento', 'Status']
+                    faturas_df = pd.DataFrame(columns=colunas)
+
+                # verificando se ja foi pago neste mes
+                filtro = (faturas_df['Email'] == email) & (
+                    faturas_df['Mês'] == mes_referencia)
+
+                # usando any para ver se o filtro retornou True
+                if filtro.any():
+                    return "Pagamento Já Registrado para o mês!"
+                # se retornar False
+                else:
+                    nova_fatura = {
+                        "Email": email,
+                        "Nome": nome,
+                        "ID": id_aluno,
+                        "Mês": mes_referencia,
+                        "Data de pagamento": data_pagamento,
+                        "Status": "Pago"
+                    }
+                    faturas_df = faturas_df._append(
+                        nova_fatura, ignore_index=True)
+                    # salvando as informações no dataframe de faturas
+                    faturas_df.to_csv(self.arquivo_faturas, index=False)
+                    print(
+                        f"Pagamento registrado com sucesso para {aluno}, no mes {mes_referencia}")
+
+    # método que gera relatorio da frequencia dos alunos
+    def Visualizar_pagos(self):
+        # primeiro ver se df exitse
+        if os.path.exists(self.arquivo_faturas):
+            tabela = pd.read_csv(self.arquivo_faturas)
+            print("Arquivo das faturas...")
+            print(tabela)
+        else:
+            return "Não existe banco de dados!"
+
+    def Registrar_Presença(self):
+        # verificando se exite o aquivo, se existir devo abrir ele
+        if os.path.exists(self.presencas_arquivo):
+            presencas_df = pd.read_csv(self.presencas_arquivo)
+        # se nao existir vou criar ele
+        else:
+            colunas = ['ID', 'Nome', 'Segunda', 'Terça',
+                       'Quarta', 'Quinta', 'Sexta', 'Sábado']
+            presencas_df = pd.DataFrame(columns=colunas)
+            presencas_df.to_csv(self.presencas_arquivo, index=False)
+
+        email = input("Digite o email para registrar presença: ")
+        if email not in self.tabela['Email'].values:
+            print("Aluno não encontrado...")
+            sleep(0.5)
+            return
+
+        # filtrando a linha onde o email é igual ao email fornecido
+        aluno = self.tabela.loc[self.tabela['Email'] == email]
+        # como aluno é um Df contendo a linha onde o email é igual ao email fornecido vou usar o iloc para filtrar o nome e id
+        nome_aluno = aluno.iloc[0]['Nome']
+        id_aluno = aluno.iloc[0]['ID']
+        # Estabelecendo os dias da semana
+        dia_semana = datetime.today().strftime('%A')
+        # dicionario contendo os dias traduzidos
+        dias_traduzidos = {
+            'Monday': 'Segunda', 'Tuesday': 'Terça', 'Wednesday': 'Quarta',
+            'Thursday': 'Quinta', 'Friday': 'Sexta', 'Saturday': 'Sábado'
+        }
+
+        if dia_semana not in dias_traduzidos:
+            return 'Hoje nao é dia de treino, pois é domingo'
+        # acessando o dicionario na chave do dia atual
+        dia_atual = dias_traduzidos[dia_semana]
+        # adicionando "Presente" para o aluno no dia atual
+        if id_aluno in presencas_df['ID'].values:
+            presencas_df.loc[presencas_df['ID'] ==
+                             id_aluno, dia_atual] = "Presente"
+        # caso seja a vez do aluno na lista de presenças
+        else:
+            novo = {"ID": id_aluno, 'Nome': nome_aluno, dia_atual: "Presente"}
+            presencas_df = presencas_df._append(novo, ignore_index=True)
+
+        presencas_df.to_csv(self.presencas_arquivo, index=False)
+        print("Presença registrada!")
+
+    def Gerar_Relatório_Frequência(self):
+        # verificando se existe o arquivo das presenças
+        if not os.path.exists(self.presencas_arquivo):
+            return f"Arquivo de presença nao encontrado"
+
+        # carregando os dados das presenças
+        presencas_df = pd.read_csv(self.presencas_arquivo)
+
+        # contabilizando as presenças por aluno
+        # iloc[:, 2:] seleciona todas as linhas e apartir da terceira coluna, pois as duas primeiras nao sao as presenças
+        # apply(lambda row: ..., axis=1): Aplica uma função a cada linha do DataFrame (o parâmetro axis=1 indica que a operação é feita por linha).
+        # lambda row: row.eq('Presente').sum() verifica os valores igual a presente retronando uma serie de True ou False, axis = 1 aplica linha por linha
+        presencas_df['Total de Presenças'] = presencas_df.iloc[:, 2:].apply(
+            lambda row: row.eq('Presente').sum(), axis=1)
+
+        # salvando o relatório
+        relatorio = 'relatorio_frequencia.csv'
+        presencas_df.to_csv(relatorio, index=False)
+        print("Relatório de frequência gerado com sucesso!")
+
+        # verificando se o usuário deseja ver os gráficos
+        resp = input(
+            "Você deseja visualizar os gráficos de análise? (Digite S para sim e N para não): ").strip().upper()[0]
+        if resp in "N":
+            print("Você optou por nao visualizar os gráficos")
+            sleep(0.5)
+            print("Obrigado!")
+
+        # montando os gráficos
+        grafico = presencas_df.plot(x='Nome', y='Total de Presenças', kind='bar', color='darkblue', figsize=(
+            10, 5), xlabel='Alunos', ylabel='Presenças', title='Gráfico de Presenças')
+        plt.show()
 
     # método responsável por alterar as informações de alunos
-
     def Alterar_Informações_Alunos(self):
         # filtrando o aluno pelo nome
         aluno = input(
-            "Digite o nome do aluno que você deseja alterar informções: ")
+            "Digite o nome do aluno ou administrador que você deseja alterar informções: ")
         # verificando se o aluno existe no banco de dados
         if aluno in self.tabela['Nome'].values:
             print("Aluno encontrado!")
             print("Digite as novas informações que serão solicitadas abaixo ou pressione enter para manter as atuais!")
             # solicitando as novas informações
-            id = input("Digite o novo Id do aluno: ").strip()
-            email = input("Digite o novo Email do aluno: ").strip()
+            id = input("Digite o novo Id: ").strip()
+            email = input("Digite o novo Email: ").strip()
             tipo_plano = input(
-                "Digite o novo Tipo de Plano do aluno: ").strip()
+                "Digite o novo Tipo de Plano, (se for adiministrador digite Nenhum): ").strip()
             pagamento = input(
                 "Digite [1] para adicionar 'Pago' ou [2] para adicionar 'Não Pago' ao aluno: ").strip()
             # só vai considerar os campos se for não vazio
             if id:
-                self.tabela.loc[self.tabela['Nome'] == aluno, 'ID'] == id
+                self.tabela.loc[self.tabela['Nome'] == aluno, 'ID'] = id
             if email:
-                self.tabela.loc[self.tabela['Nome'] == aluno, 'Email'] == email
+                self.tabela.loc[self.tabela['Nome'] == aluno, 'Email'] = email
             if tipo_plano:
                 self.tabela.loc[self.tabela['Nome'] ==
-                                aluno, 'Tipo de Plano'] == tipo_plano
+                                aluno, 'Tipo de Plano'] = tipo_plano
             if pagamento:
                 self.tabela.loc[self.tabela['Nome'] == aluno,
-                                'Pagamento'] == 'Pago' if pagamento in '1' else 'Não Pago'
+                                'Pagamento'] = 'Pago' if pagamento in '1' else 'Não Pago'
             # salvando as info
             self.salvar()
         else:
@@ -184,20 +332,56 @@ class Administrador:
         while True:
             try:
                 n = int(n)
-                if n in [1, 2, 3, 4, 5, 6, 7, 8]:
+                if n in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
                     return n
                 else:
-                    n = input("Opção Inválida, digite novamente de 1 a 8: ")
+                    n = input("Opção Inválida, digite novamente de 1 a 10: ")
             except (ValueError, TypeError):
                 n = input("Opção inválida digite novamente: ")
 
+    def redefinir_senha(self):
+        # verificando se o arquivo principal nao existe
+        if not os.path.exists(self.arquivo):
+            print("Arquivo de banco de dados não encontrado! ")
+            return
 
+        # se existir vou  ler
+        tabela = pd.read_csv(self.arquivo)
+
+        email = input("Digite seu email: ").strip()
+
+        # verifica se o aluno exite no df
+        aluno = tabela[(tabela["Email"] == email) &
+                       (tabela["Tipo"] == "Administrador")]
+
+        # se nao existe
+        if aluno.empty:
+            print("Nome não encontrado! ")
+            return
+
+        senha_atual = input("Digite a sua senha atual: ").strip()
+        senha_nova = input("Digite a nova senha: ").strip()
+
+        # se a senha atual confere
+        if aluno.iloc[0]['Senha'] == senha_atual:
+            tabela.loc[tabela['Email'] == email, 'Senha'] = senha_nova
+            tabela.to_csv(self.arquivo, index=False)
+            print("Senha redefinida com sucesso! ")
+
+        # senao
+        else:
+            print("Senha atual não confere! ")
+            sleep(1)
+            return
+
+
+# aqui em diante garante que o codigo seja executado somente se eu executar Administrador.py (if __name__ == "__main__")
 if __name__ == "__main__":
     admin = Administrador()
     while True:
         admin.Cabeçalho()
         opcao = admin.tratando(
-            input("Digite o número da sua escolha: ").strip()[0])
+            input("Digite o número da sua escolha: ").strip())
         if opcao == 1:
             admin.Cadastrar_Usuário()
         elif opcao == 2:
@@ -207,17 +391,20 @@ if __name__ == "__main__":
         elif opcao == 4:
             admin.Registrar_Pagamento()
         elif opcao == 5:
-            print("Função ainda em construção")
+            admin.Registrar_Presença()
         elif opcao == 6:
-            print("Função ainda em contrução")
+            admin.Gerar_Relatório_Frequência()
         elif opcao == 7:
             admin.Alterar_Informações_Alunos()
         elif opcao == 8:
+            admin.Visualizar_pagos()
+        elif opcao == 9:
+            admin.redefinir_senha()
+        elif opcao == 10:
             print("Saindo do sistema...")
             sleep(1)
             print("Obrigado!")
             break
 
-# print("revisar o alterrar informações para pago")
-# print("Estudar ultima parte")
-# tenho que separar a parte da senha, da presença e pensar em algo para o pagamento
+
+# deixar o id gerar aleatoriamente
