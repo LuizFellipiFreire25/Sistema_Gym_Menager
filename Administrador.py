@@ -3,6 +3,7 @@ import os
 from time import sleep
 from datetime import datetime
 import matplotlib.pyplot as plt
+import random
 
 
 class Administrador:
@@ -41,7 +42,7 @@ class Administrador:
         print('-=' * 30)
         print("Opções: ")
         lista = ['1. Cadastrar Usuário', '2. Ver Usuário', '3. Cadastrar Plano',
-                 '4. Registrar Pagamento', '5. Registrar Presença', '6. Gerar Relatório Frequência', '7. Alterar Informações de Alunos', '8. Visualizar Pagamentos', '9. Sair']
+                 '4. Registrar Pagamento', '5. Registrar Presença', '6. Gerar Relatório Frequência', '7. Alterar Informações de Alunos', '8. Visualizar Pagamentos', '9. Redefinir Senha', '10. Sair']
         for elemento in lista:
             print(elemento)
         print('-=' * 30)
@@ -57,9 +58,14 @@ class Administrador:
 
         # se nao estiver cadastrado, deve cadastrar
         else:
-            id = input("Digite o ID: ")
-            nome = input("Digite o Nome: ")
-            senha = input("Digite uma Senha para o primeiro acesso: ")
+            # primeiro vou gerar um ID aleatório para o novo cadastrado!
+            while True:
+                id = random.randint(1000, 9999)
+                if id not in self.tabela['ID'].values:
+                    break
+
+            nome = input("Digite o Nome: ").strip().title()
+            senha = input("Digite uma Senha: ").strip()
             plano = input(
                 "Digite o tipo de plano, (se for Administrador ou personal digite Nenhum): ")
             tipo = input(
@@ -71,7 +77,11 @@ class Administrador:
             elif tipo == 'P':
                 tipo = 'Personal'
 
-            novo = {'Nome': nome, 'ID': id,
+            print("Gerando um ID...")
+            sleep(2)
+            print(f"{nome} seu ID é: {id}")
+            sleep(2)
+            novo = {'Nome': nome, 'ID': id, 'Senha': senha,
                     'Tipo de Plano': plano, 'Email': email, 'Tipo': tipo}
             self.tabela = self.tabela._append(novo, ignore_index=True)
             self.tabela.loc[self.tabela['Nome'] == nome,
@@ -322,22 +332,56 @@ class Administrador:
         while True:
             try:
                 n = int(n)
-                if n in [1, 2, 3, 4, 5, 6, 7, 8, 9]:
+                if n in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]:
                     return n
                 else:
-                    n = input("Opção Inválida, digite novamente de 1 a 8: ")
+                    n = input("Opção Inválida, digite novamente de 1 a 10: ")
             except (ValueError, TypeError):
                 n = input("Opção inválida digite novamente: ")
 
+    def redefinir_senha(self):
+        # verificando se o arquivo principal nao existe
+        if not os.path.exists(self.arquivo):
+            print("Arquivo de banco de dados não encontrado! ")
+            return
+
+        # se existir vou  ler
+        tabela = pd.read_csv(self.arquivo)
+
+        email = input("Digite seu email: ").strip()
+
+        # verifica se o aluno exite no df
+        aluno = tabela[(tabela["Email"] == email) &
+                       (tabela["Tipo"] == "Administrador")]
+
+        # se nao existe
+        if aluno.empty:
+            print("Nome não encontrado! ")
+            return
+
+        senha_atual = input("Digite a sua senha atual: ").strip()
+        senha_nova = input("Digite a nova senha: ").strip()
+
+        # se a senha atual confere
+        if aluno.iloc[0]['Senha'] == senha_atual:
+            tabela.loc[tabela['Email'] == email, 'Senha'] = senha_nova
+            tabela.to_csv(self.arquivo, index=False)
+            print("Senha redefinida com sucesso! ")
+
+        # senao
+        else:
+            print("Senha atual não confere! ")
+            sleep(1)
+            return
+
 
 # aqui em diante garante que o codigo seja executado somente se eu executar Administrador.py (if __name__ == "__main__")
-# para eu chamar as funções da classe Administrador eu tenho que criar o cabeçalho novamente no módulo que eu for chamar, ficará exatamente igual tirando a parte comentada acima
 if __name__ == "__main__":
     admin = Administrador()
     while True:
         admin.Cabeçalho()
         opcao = admin.tratando(
-            input("Digite o número da sua escolha: ").strip()[0])
+            input("Digite o número da sua escolha: ").strip())
         if opcao == 1:
             admin.Cadastrar_Usuário()
         elif opcao == 2:
@@ -355,10 +399,12 @@ if __name__ == "__main__":
         elif opcao == 8:
             admin.Visualizar_pagos()
         elif opcao == 9:
+            admin.redefinir_senha()
+        elif opcao == 10:
             print("Saindo do sistema...")
             sleep(1)
             print("Obrigado!")
             break
 
 
-# falta senha
+# deixar o id gerar aleatoriamente

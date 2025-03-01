@@ -27,7 +27,7 @@ class Aluno:
         print("-="*30)
         print("Opções: ")
         lista = ['1- Treinos', '2- Treinos Extra', '3- Avaliações', '4- Ver Status de avaliação',
-                 '5- Meu progresso', '6- Faturas', '7- Arquivos', '8- Sair']
+                 '5- Meu progresso', '6- Faturas', '7- Arquivos', '8- Redefinir senha', '9- Sair']
         for opções in lista:
             print(opções)
         print("-="*30)
@@ -294,6 +294,41 @@ class Aluno:
 
         print("Sua dúvida foi enviada para o personal")
 
+    def redefinir_senha(self):
+        # verificando se o arquivo principal nao existe
+        if not os.path.exists(self.arquivo):
+            print("Arquivo de banco de dados não encontrado! ")
+            return
+
+        # se existir vou  ler
+        tabela = pd.read_csv(self.arquivo)
+
+        email = input("Digite seu email: ").strip()
+
+        # verifica se o aluno exite no df
+        aluno = tabela[(tabela["Email"] == email) &
+                       (tabela["Tipo"] == "Aluno")]
+
+        # se nao existe
+        if aluno.empty:
+            print("Nome não encontrado! ")
+            return
+
+        senha_atual = input("Digite a sua senha atual: ").strip()
+        senha_nova = input("Digite a nova senha: ").strip()
+
+        # se a senha atual confere
+        if aluno.iloc[0]['Senha'] == senha_atual:
+            tabela.loc[tabela['Email'] == email, 'Senha'] = senha_nova
+            tabela.to_csv(self.arquivo, index=False)
+            print("Senha redefinida com sucesso! ")
+
+        # senao
+        else:
+            print("Senha atual não confere! ")
+            sleep(1)
+            return
+
 
 if __name__ == "__main__":
     user = Aluno()
@@ -314,8 +349,8 @@ if __name__ == "__main__":
             user.Faturas()
         elif opcao == 7:
             user.arquivos()
+        elif opcao == 8:
+            user.redefinir_senha()
         else:
             print("Saindo do sistema...")
             break
-
-# faltando somente a senha

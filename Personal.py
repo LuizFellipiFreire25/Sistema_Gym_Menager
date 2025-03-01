@@ -22,7 +22,7 @@ class Personal:
         print("               Sistema do Personal Trainer")
         print("-="*30)
         lista = ['1- Acessar Avaliações dos alunos', '2- Visualizar Progresso dos alunos', '3- Visualizar presenças',
-                 '4- Atribuir treinos personalizados', '5- Anotações sobre os alunos', '6- Sair']
+                 '4- Atribuir treinos personalizados', '5- Anotações sobre os alunos', '6- Redefinir senha', '7- Sair']
         print("Opções")
         for elemento in lista:
             print(elemento)
@@ -231,7 +231,7 @@ class Personal:
         while True:
             try:
                 n = int(n)
-                if n in [1, 2, 3, 4, 5, 6]:
+                if n in [1, 2, 3, 4, 5, 6, 7]:
                     return n
                 else:
                     n = input("Opção Inválida, digite novamente de 1 a 6: ")
@@ -312,6 +312,41 @@ class Personal:
 
         print(f"\nResposta enviada para {nome_aluno}, obrigado!")
 
+    def redefinir_senha(self):
+        # verificando se o arquivo principal nao existe
+        if not os.path.exists(self.arquivo):
+            print("Arquivo de banco de dados não encontrado! ")
+            return
+
+        # se existir vou  ler
+        tabela = pd.read_csv(self.arquivo)
+
+        email = input("Digite seu email: ").strip()
+
+        # verifica se o aluno exite no df
+        personal = tabela[(tabela["Email"] == email) &
+                          (tabela["Tipo"] == "Personal")]
+
+        # se nao existe
+        if personal.empty:
+            print("Nome não encontrado! ")
+            return
+
+        senha_atual = input("Digite a sua senha atual: ").strip()
+        senha_nova = input("Digite a nova senha: ").strip()
+
+        # se a senha atual confere
+        if personal.iloc[0]['Senha'] == senha_atual:
+            tabela.loc[tabela['Email'] == email, 'Senha'] = senha_nova
+            tabela.to_csv(self.arquivo, index=False)
+            print("Senha redefinida com sucesso! ")
+
+        # senao
+        else:
+            print("Senha atual não confere! ")
+            sleep(1)
+            return
+
 
 if __name__ == "__main__":
     while True:
@@ -329,10 +364,10 @@ if __name__ == "__main__":
             per.Atribuir_treinos_personalizados()
         elif opcao == 5:
             per.Anotacoes_sobre_alunos()
+        elif opcao == 6:
+            per.redefinir_senha()
         else:
             print("Saindo do sistema...")
             sleep(1)
             print("Obrigado!")
             break
-
-# faltando somente a senha

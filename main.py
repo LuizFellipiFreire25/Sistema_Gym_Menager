@@ -21,12 +21,13 @@ def opcoes():
 def funcoes_administrador():
     print("Login bem-sucedido! Acessando o sistema do Administrador...")
     sleep(0.5)
-    # nas proximas 20 linhas eu repito o cabeçalho criado em Administrador.py pois aquele criado só acessa se eu executar aquele modulo
-    admin = Administrador()  # atribuindo a classe Administrador a uma variavel
+    admin = Administrador()
+
     while True:
         admin.Cabeçalho()
         opcao = admin.tratando(
-            input("Digite o número da sua escolha: ").strip()[0])
+            input("Digite o número da sua escolha: ").strip())
+
         if opcao == 1:
             admin.Cadastrar_Usuário()
         elif opcao == 2:
@@ -44,8 +45,12 @@ def funcoes_administrador():
         elif opcao == 8:
             admin.Visualizar_pagos()
         elif opcao == 9:
+            admin.redefinir_senha()
+        elif opcao == 10:
             print("Saindo do sistema...")
-            break
+            sleep(1)
+            print("Obrigado!")
+            return
 
 
 def funcoes_aluno():
@@ -69,6 +74,8 @@ def funcoes_aluno():
             user.Faturas()
         elif opcao == 7:
             user.arquivos()
+        elif opcao == 8:
+            user.redefinir_senha()
         else:
             print("Saindo do sistema...")
             break
@@ -92,6 +99,8 @@ def funcoes_personal():
             per.Atribuir_treinos_personalizados()
         elif opcao == 5:
             per.Anotacoes_sobre_alunos()
+        elif opcao == 6:
+            per.redefinir_senha()
         else:
             print("Saindo do sistema...")
             sleep(1)
@@ -106,10 +115,11 @@ def login():
         return
     # pedindo o email do usuário
     email = input("Digite seu email: ").strip()
+    senha = input("Digite a sua senha: ").strip()
     # abrindo o arquivo criado em Administrador.py em forma de tabela
     tabela = pd.read_csv('Visualizar_alunos.csv')
 
-    if email in tabela['Email'].values:
+    if (email in tabela['Email'].values) and (senha in tabela['Senha'].values):
         # Obtendo a linha correspondente, iloc[0] garante que estarei filtrando a primeira linha do dataframe
         usuario = tabela[tabela['Email'] == email].iloc[0]
         if usuario['Tipo'] == 'Administrador':
@@ -140,9 +150,10 @@ def cadastro():
         return "Arquivo de banco de dados não encontrado"
 
     tabela = pd.read_csv(arquivo)
-    email = input("Digite o seu email: ")
+    email = input("Digite o seu email: ").strip()
+    senha = input("Digite a sua senha: ").strip()
     # primeiro vou verificar se o email existe no df
-    if email in tabela['Email'].values:
+    if (email in tabela['Email'].values) and (senha in tabela['Senha'].values):
         usuario = tabela[tabela["Email"] == email].iloc[0]
         if usuario['Tipo'] == 'Administrador':
             print(
@@ -171,5 +182,3 @@ while True:
         break
     else:
         print("Opção inválida! Tente novamente.")
-
-# tenho que separar a parte da senha para login e cadastro
