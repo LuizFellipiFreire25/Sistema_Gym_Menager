@@ -1,356 +1,232 @@
-import pandas as pd
+import sqlite3
 from time import sleep
-import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 
 
 class Aluno:
     def __init__(self):
-        # self.id_aluno = id_aluno
-        # self.nome = nome
-        self.dados_pessoais = "dados_alunos.csv"
-        self.pagamento = False
-        self.faturas = "Faturas.csv"
-        self.arquivo_treinos = "treinos.txt"
-        self.progresso = "pregresso.csv"
-        self.arquivo_avaliacoes = "Avaliacoes.csv"
-        self.arquivo = 'Visualizar_alunos.csv'
-        self.treinos_personalizados = "treinos_personalizados.csv"
-        self.treinos = "treinos.txt"
-        self.duvidas_arquivos = 'duvidas_alunos.csv'
+        self.conexao = sqlite3.connect('academia.db')
+        self.cursor = self.conexao.cursor()
+
+    def salvar(self):
+        self.conexao.commit()
 
     def cabecalho(self):
-        """método que exibe as opções do cabeçalho para os alunos"""
-        print("-="*30)
+        print("-=" * 30)
         print("              Sistema do aluno, Seja bem vindo!")
-        print("-="*30)
+        print("-=" * 30)
         print("Opções: ")
-        lista = ['1- Treinos', '2- Treinos Extra', '3- Avaliações', '4- Ver Status de avaliação',
-                 '5- Meu progresso', '6- Faturas', '7- Arquivos', '8- Redefinir senha', '9- Sair']
-        for opções in lista:
-            print(opções)
-        print("-="*30)
+        lista = ['1- Treinos', '2- Avaliações', '3- Ver Status de avaliação', '4- Meu progresso',
+                 '5- Faturas', '6- Enviar dúvida', '7- Redefinir senha', '8- Sair']
+        for opcoes in lista:
+            print(opcoes)
+        print("-=" * 30)
 
-    def Treinos(self):
-        '''método que mostra para o aluno o treino que foi inferido para ele'''
-        # verificando se existe os arquivos
-        if not os.path.exists(self.arquivo):
-            print("Arquivo principal não encontrado! ")
-            return
+    def treinos(self, email):
+        usuario_id = self.cursor.execute(
+            'SELECT id FROM usuarios WHERE email = ?', (email, )).fetchone()
 
-        if not os.path.exists(self.treinos_personalizados):
-            print("Arquivos de treinos personalizados não encontrado! ")
-            return
+        if usuario_id is not None:
+            usuario_id = usuario_id[0]
+            self.cursor.execute(
+                'SELECT treino FROM treinos_personalizados WHERE aluno_id = ? ORDER BY data_atribuicao DESC LIMIT 1', (usuario_id, ))
+            treino = self.cursor.fetchone()
 
-        # vendo se se o aluno existe no arquivo de treinos personalizados
-        nome_aluno = input("Digite seu nome: ").strip().title()
-        tabela = pd.read_csv(self.treinos_personalizados)
+            if treino:
+                print(f"Treino atribuído: {treino[0]}")
 
-        if nome_aluno in tabela['Nome'].values:
-            aluno_infos = tabela[tabela['Nome'] == nome_aluno].iloc[-1]
-            print(f"\nOs treinos Atribuídos para {nome_aluno} são: \n")
-            sleep(0.5)
-            treino_nome = aluno_infos['Treino']
-            print()
-            with open(self.treinos, 'r', encoding='UTF-8') as file:
-                treinos = file.read().split("# ")
-
-            for treino in treinos:
-                if treino_nome in treino:
-                    print(treino)
-                    return
-
+            else:
+                print("Nenhum treino personalizado encontrado.")
         else:
+            print("Usuario nao encontrado!")
+
+    def avaliacao(self, email):
+        # Obtendo o ID do aluno com base no email
+        self.cursor.execute(
+            "SELECT id FROM usuarios WHERE email = ? AND tipo = 'Aluno'", (email,))
+        aluno = self.cursor.fetchone()
+
+        if not aluno:
             print("Aluno não encontrado!")
             return
 
-    def Treinos_extra(self):
-        """método que o aluno visualiza todos os treinos do banco de dados"""
-        print("Os treinos cadastrados no banco de dados são: ")
-        sleep(1)
-        with open(self.arquivo_treinos, 'r', encoding='UTF-8') as file:
-            treinos = file.read()
-            print(treinos)
+        aluno_id = aluno[0]  # Pegamos o ID do aluno encontrado
 
-    def Avaliacao(self):
-        try:
-            tabela = pd.read_csv("Visualizar_alunos.csv")
-            nome = input("Digite seu nome completo: ").strip().title()
+        # Coletando informações da avaliação
+        dias_disponiveis = input(
+            "Informe os dias disponíveis separados por vírgula: ").strip()
+        horarios_disponiveis = input(
+            "Informe os horários disponíveis: ").strip()
 
-            if tabela[(tabela["Nome"] == nome) & (tabela["Tipo"] == 'Aluno')].empty:
-                return "Erro aluno nao encontrado!"
+        # Inserindo a avaliação com status pendente e sem personal atribuído ainda (NULL)
+        self.cursor.execute("""
+            INSERT INTO avaliacoes (aluno_id, disponibilidade, horario, status, personal_id)
+            VALUES (?, ?, ?, ?, NULL)
+        """, (aluno_id, dias_disponiveis, horarios_disponiveis, "Pendente"))
 
+        self.salvar()
+        print("Avaliação agendada com sucesso!")
+
+    def ver_status_avaliacao(self, email):
+        usuario_id = self.cursor.execute(
+            'SELECT id FROM usuarios WHERE email = ?', (email, )).fetchone()
+
+        if usuario_id is not None:
+            usuario_id = usuario_id[0]
+            self.cursor.execute(
+                "SELECT status FROM avaliacoes WHERE aluno_id = ? ORDER BY id DESC LIMIT 1", (usuario_id,))
+            status = self.cursor.fetchone()
+
+            if status:
+                print(f"Status da avaliação: {status[0]}")
             else:
-                dias_disponiveis = input(
-                    "Informe o dia disponível na semana ou datas específicas, separando-os por vírgula (Ex: Segunda, Terça ou 12/01/25): ")
-                horarios_disponiveis = input(
-                    "Informe os horários disponíveis, (ex: 18:00): ")
+                print("Nenhuma avaliação encontrada.")
 
-                datas = {
-                    "Nome": [nome],
-                    "Disponibilidade": [dias_disponiveis],
-                    "Horário": [horarios_disponiveis]
-                }
+    def meu_progresso(self, email):
+        while True:
+            try:
+                peso = float(
+                    input("Digite seu peso atual (Kg): ").replace(',', '.'))
+                break
+            except ValueError:
+                print("Valor inválido! Por favor, digite um número para o peso.")
 
-                df_Avaliacao = pd.DataFrame(datas)
+        while True:
+            try:
+                altura = float(
+                    input("Digite sua altura (m): ").replace(',', '.'))
+                break
+            except ValueError:
+                print("Valor inválido! Por favor, digite um número para a altura.")
 
-                if os.path.exists(self.arquivo_avaliacoes):
-                    df_Avaliacao.to_csv(
-                        self.arquivo_avaliacoes, mode='a', header=False, index=False)
-                    return "Avaliação agendada com sucesso!"
+        self.cursor.execute(
+            "SELECT id FROM usuarios WHERE email = ? AND tipo = 'Aluno'", (email,))
+        aluno = self.cursor.fetchone()
+        aluno_id = aluno[0]  # Pegamos o ID do aluno encontrado
 
-                else:
-                    df_Avaliacao.to_csv(
-                        self.arquivo_avaliacoes, mode='w', header=True, index=False)
-                    return "Avaliação agendada com sucesso!"
+        imc = round(peso / (altura ** 2), 2)
+        data_atual = datetime.today().strftime('%Y-%m-%d')
 
-        except FileNotFoundError:
-            print('Pasta de dados não encontrada')
+        self.cursor.execute("INSERT INTO progresso (aluno_id, data, peso, altura, imc) VALUES (?, ?, ?, ?, ?)",
+                            (aluno_id, data_atual, peso, altura, imc))
 
-        except Exception as e:
-            print(f"Erro: {e}")
+        self.salvar()
 
-    def Ver_status_avaliacao(self):
-        # verificando se o df de avaliação existe
-        if not os.path.exists(self.arquivo_avaliacoes):
-            print("Não existe o arquivo de avaliações! ")
-            return
-        # se existe
-        tabela = pd.read_csv(self.arquivo_avaliacoes)
-        nome_aluno = input(
-            "Digite seu nome para visualizar o Status de avaliação: ").strip().title()
+        self.cursor.execute(
+            "SELECT data, peso FROM progresso WHERE aluno_id = ?", (aluno_id,))
+        progresso = self.cursor.fetchall()
 
-        # verificando se o aluno existe no df de avaliações
-        aluno_info = tabela[tabela['Nome'] == nome_aluno].iloc[0]
-
-        if aluno_info.empty:
-            print("Não encontramos seu nome nos dados de avaliações, provavelmente você ainda não marcou uma avaliação!")
+        if not progresso:
+            print("Nenhum dado de progresso encontrado!")
             return
 
-        if nome_aluno not in aluno_info.values:
-            print("Não encontramos seu nome nos dados de avaliações, provavelmente você ainda não marcou uma avaliação!")
-            return
+        self.cursor.execute(
+            "SELECT * FROM progresso WHERE aluno_id = ?", (aluno_id,))
+        informacoes = self.cursor.fetchall()
+        print(informacoes)
 
-        # se existe
-        print("Vamos exibir seu status abaixo: ")
-        sleep(0.5)
-        if pd.isna(aluno_info["Status"]):
-            print("Sua solicitação ainda não foi respondida por um personal!")
-        else:
-            print(aluno_info['Status'])
-
-    def Meu_progresso(self):
-        '''metodo que atualiza o progresso do aluno, gera um data frame para os dados e plota gráficos de anáilise'''
-        nome = input("Digite o seu nome: ").strip().title()
-        # tenteando acessar a tabela principal para ver se o aluno esta cadastrado
-        try:
-            tabela = pd.read_csv("Visualizar_alunos.csv")
-            if tabela[(tabela['Nome'] == nome) & (tabela['Tipo'] == "Aluno")].empty:
-                print("Aluno não encontrado! ")
-                return
-
-        except FileNotFoundError:
-            print("Banco de dados não encontrado!")
-            return
-        # tentando acessar o data frame do progresso dos alunos e atribuindo o nome do aluno para uma variável
-        try:
-            df_progresso = pd.read_csv(self.progresso)
-            aluno_progresso = df_progresso[df_progresso['Nome'] == nome]
-        # se ele nao achar o arquivo, vou iniciar as duas variaveis abaixo como um data fframe
-        except FileNotFoundError:
-            df_progresso = pd.DataFrame()
-            aluno_progresso = pd.DataFrame()
-        # uniciando as variaveis que vou usar, como um dataframe
-        novo_progresso = pd.DataFrame()
-        progresso_atual = pd.DataFrame()
-        # se o aluno da vez estiver com o progresso vazio, vou coletar seus dados, tranformar em data frame e mandar para uma variável
-        if aluno_progresso.empty:
-            print("Você ainda não tem os dados cadastrados no sistema! ")
-            peso = float(input("Digite o peso (Kg): "))
-            altura_str = input("Digite a altura (M): ")
-            altura = float(altura_str.replace(',', '.'))
-            imc = round(peso/(altura**2), 2)
-            dados = {
-                "Nome": [nome],
-                "Altura": [altura],
-                "Peso": [peso],
-                "IMC": [imc],
-                "Data": [datetime.today().strftime('%Y-%m-%d')]
-            }
-            progresso_atual = pd.DataFrame(dados)
-        # se o aluno não estiver com o progresso vazio eu pego o novo peso, filtro a nova altura e faço o mesmo processo anterior
-        else:
-            print("Você ja tem alguns dados cadastrados! ")
-            peso_novo = input("Digite o seu peso atual (Kg): ")
-            altura_novo = aluno_progresso['Altura'].values[0]
-            # Converte os valores para float para garantir que sejam numéricos
-            peso_novo = float(peso_novo.replace(',', '.')) if isinstance(
-                peso_novo, str) else float(peso_novo)
-            # Garante que altura_novo seja uma string antes de substituir e converter para float
-            altura_novo = float(str(altura_novo).replace(',', '.'))
-            imc_novo = round(peso_novo / (altura_novo ** 2), 2)
-
-            novos_dados = {
-                "Nome": [nome],
-                "Altura": [altura_novo],
-                "Peso": [peso_novo],
-                "IMC": [imc_novo],
-                "Data": [datetime.today().strftime('%Y-%m-%d')]
-            }
-            novo_progresso = pd.DataFrame(novos_dados)
-
-        # concat nos permite agrupar mais de um dataframe no mesmo arquivo
-        df_progresso = pd.concat(
-            [df_progresso, progresso_atual, novo_progresso], ignore_index=True)
-        # salvando o dataframe no arquivo principal do progresso
-        df_progresso.to_csv(self.progresso, index=False)
-
-        # plotando os gráficos
-        opcao = input(
-            "Quer visualizar os gráficos? digite S para sim e N para não: ").strip().upper()[0]
-        if opcao == 'S':
+        if progresso:
+            datas, pesos = zip(*progresso)
             plt.figure(figsize=(10, 6))
-            df_progresso[df_progresso['Nome'] == nome].plot(kind='bar',
-                                                            x='Data', y='Peso', linestyle='-')
-            plt.title("Gráfico de Análise de evolução do peso (Kg)")
+            plt.plot(datas, pesos, marker='o', linestyle='-', color='b')
             plt.xlabel("Data")
             plt.ylabel("Peso (Kg)")
-            plt.grid(color='darkblue', alpha=0.7)
-            plt.tight_layout()
+            plt.title("Evolução do Peso")
+            plt.grid(True)
             plt.show()
-            return
-
-    def Faturas(self):
-        # verificando se existe o arquivo da fatura
-        if os.path.exists(self.faturas):
-            tabela = pd.read_csv(self.faturas)
 
         else:
-            return "Não existe o arquivo das faturas"
+            print("Nenhum dado de progresso encontrado!")
 
-        email = input("Digite seu email: ").strip()
-        sleep(0.5)
-        print("Gerando suas faturas...")
-        sleep(1)
+    def faturas(self, email):
+        usuario_id = self.cursor.execute(
+            'SELECT id FROM usuarios WHERE email = ?', (email, )).fetchone()
 
-        # filtrando o mes atual
-        mes_atual = datetime.today().strftime('%m/%Y')
+        if usuario_id is not None:
+            usuario_id = usuario_id[0]
+            mes_atual = datetime.today().strftime("%m/%Y")
+            status = self.cursor.execute(
+                'SELECT status FROM faturas WHERE usuario_id = ? AND mes_referencia = ?', (usuario_id, mes_atual)).fetchone()
 
-        # filtrando a linha correspondente ao email e mes atuais
-        fatura = tabela[(tabela['Email'] == email) &
-                        (tabela['Mês'] == mes_atual)]
-
-        # verificando se tem fatura registrada no mes atual para o aluno
-        if fatura.empty:
-            print(
-                f"Olá, não encontramos pagamento registrado para o mês: {mes_atual}")
-            print("Por favor, verifique sua situação com a Adiministração!")
-            return
-
+            if status is not None:
+                status = status[0]
+                print(f'Status da fatura: {status}')
+            else:
+                print('Nenhuma fatura encontrada para este mês.')
         else:
-            nome = fatura.iloc[0]['Nome']
-            status = fatura.iloc[0]['Status']
-            print(
-                f"Olá, {nome}. Sua fatura referente ao mês {mes_atual} esta com o Status: {status}")
+            print('Email não encontrado.')
 
-    def arquivos(self):
-        nome = input("Digite seu nome completo: ").strip().title()
+    def enviar_duvida(self, email):
+        usuario_id = self.cursor.execute(
+            'SELECT id FROM usuarios WHERE email = ?', (email, )).fetchone()
 
-        # verificando se existe o arquivo de duvidas
-        if os.path.exists(self.duvidas_arquivos):
-            tabela = pd.read_csv(self.duvidas_arquivos)
-            # verificando se tem duvidas pendentes
-            pendente = tabela[(tabela["Nome"] == nome) &
-                              (tabela["Status"] == 'Pendente')]
-            # verificando se o aluno nao tem nenhuma duvida pendente
-            if not pendente.empty:
+        if usuario_id is not None:
+            usuario_id = usuario_id[0]
+            self.cursor.execute(
+                "SELECT status FROM duvidas WHERE aluno_id = ? ORDER BY id DESC LIMIT 1", (usuario_id, ))
+            pendente = self.cursor.fetchone()
+
+            if pendente and pendente[0] == 'Pendente':
                 print(
-                    "Você ja tem uma duvida pendente, aguarde o personal responder sua duvida antes de enviar outra...")
+                    "Você já tem uma dúvida pendente. Aguarde a resposta antes de enviar outra.")
                 return
+
+            else:
+                duvida = input("Digite sua dúvida: ").strip()
+                data_atual = datetime.today().strftime("%Y-%m-%d")
+                self.cursor.execute("INSERT INTO duvidas (aluno_id, data, duvida, resposta, status) VALUES (?, ?, ?, ?, ?)",  (
+                    usuario_id, data_atual, duvida, "Aguardando resposta do personal", "Pendente"))
+                self.salvar()
+                print("Sua dúvida foi enviada!")
+
         else:
-            tabela = pd.DataFrame(
-                columns=['Nome', 'Data', 'Dúvida', 'Anexo', 'Resposta', 'Status'])
+            print("Usuário não encontrado!")
 
-        # coletando uma dúvida e verificando se é não vazia
-        duvida = input("Digite sua dúvida: ").strip()
-
-        if not duvida:
-            print("Não é permitido dúvidas vazias!")
-            return
-
-        # criando a nova duvida no df
-        nova = {
-            "Nome": nome,
-            "Data": datetime.today().strftime("%d/%m/%Y"),
-            "Dúvida": duvida,
-            "Resposta": 'Agurdando Resposta do Personal',
-            "Status": 'Pendente'
-        }
-
-        # salvando tudo
-        tabela = tabela._append(nova, ignore_index=True)
-        tabela.to_csv(self.duvidas_arquivos, index=False)
-
-        print("Sua dúvida foi enviada para o personal")
-
-    def redefinir_senha(self):
-        # verificando se o arquivo principal nao existe
-        if not os.path.exists(self.arquivo):
-            print("Arquivo de banco de dados não encontrado! ")
-            return
-
-        # se existir vou  ler
-        tabela = pd.read_csv(self.arquivo)
-
-        email = input("Digite seu email: ").strip()
-
-        # verifica se o aluno exite no df
-        aluno = tabela[(tabela["Email"] == email) &
-                       (tabela["Tipo"] == "Aluno")]
-
-        # se nao existe
-        if aluno.empty:
-            print("Nome não encontrado! ")
-            return
-
-        senha_atual = input("Digite a sua senha atual: ").strip()
+    def redefinir_senha(self, email):
         senha_nova = input("Digite a nova senha: ").strip()
+        sleep(1)
+        self.cursor.execute(
+            "UPDATE usuarios SET senha = ? WHERE email = ?", (senha_nova, email))
+        self.salvar()
+        print("Senha alterada com sucesso!")
 
-        # se a senha atual confere
-        if aluno.iloc[0]['Senha'] == senha_atual:
-            tabela.loc[tabela['Email'] == email, 'Senha'] = senha_nova
-            tabela.to_csv(self.arquivo, index=False)
-            print("Senha redefinida com sucesso! ")
+    def fechar_conexao(self):
+        self.conexao.close()
 
-        # senao
-        else:
-            print("Senha atual não confere! ")
-            sleep(1)
-            return
+    def tratar_entrada(self):
+        while True:
+            entrada = input(
+                "Digite o número da sua escolha (1 a 8): ").strip()
+            if entrada.isdigit():  # Verifica se a entrada é composta apenas por números
+                numero = int(entrada)
+                if 1 <= numero <= 8:  # Verifica se está no intervalo permitido
+                    return numero
+            print("Entrada inválida! Por favor, digite um número de 1 a 8.")
 
 
 if __name__ == "__main__":
     user = Aluno()
+    email = input("Digite seu email para login: ").strip()
+    sleep(1)
     while True:
         user.cabecalho()
-        opcao = int(input("Digite o numero da sua opção: "))
+        opcao = user.tratar_entrada()
         if opcao == 1:
-            user.Treinos()
+            user.treinos(email)
         elif opcao == 2:
-            user.Treinos_extra()
+            user.avaliacao(email)
         elif opcao == 3:
-            user.Avaliacao()
+            user.ver_status_avaliacao(email)
         elif opcao == 4:
-            user.Ver_status_avaliacao()
+            user.meu_progresso(email)
         elif opcao == 5:
-            user.Meu_progresso()
+            user.faturas(email)
         elif opcao == 6:
-            user.Faturas()
+            user.enviar_duvida(email)
         elif opcao == 7:
-            user.arquivos()
+            user.redefinir_senha(email)
         elif opcao == 8:
-            user.redefinir_senha()
-        else:
             print("Saindo do sistema...")
+            user.fechar_conexao()
             break
