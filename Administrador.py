@@ -55,10 +55,12 @@ class Administrador:
 
         nome = input("Digite o Nome: ").strip().title()
         senha = input("Digite uma Senha: ").strip()
-        plano = input(
-            "Digite o tipo de plano (se for Administrador ou personal digite Nenhum): ").strip()
         tipo = input(
             "O usuário será Administrador, Personal ou Aluno? (A para Admin, L para Aluno e P para Personal): ").strip().upper()
+        plano = input(
+            "Digite o tipo de plano (se for Administrador ou personal digite Nenhum): ").strip()
+        if tipo in ['A', 'P']:
+            plano = 'Nenhum'
         tipo = "Administrador" if tipo == "A" else "Aluno" if tipo == "L" else "Personal"
 
         print("Gerando um ID...")
@@ -83,6 +85,7 @@ class Administrador:
             sleep(1)
             print(usuario)
             sleep(1)
+            return
 
         print("Usuário não encontrado...")
 
@@ -98,17 +101,20 @@ class Administrador:
                 print("Planos existentes: ")
                 for plano in planos:
                     print(
-                        f"ID: {plano[0]}, Nome: {plano[1]}, Duração: {plano[2]}, Valor: {plano[3]}, Benefícios: {plano[4]}")
+                        f"Nome: {plano[1]}, Duração: {plano[2]}, Valor: {plano[3]}, Benefícios: {plano[4]}")
 
             else:
                 print("Não há planos cadastrados! ")
 
-            nome_plano = input("Digite o nome do novo plano: ").title().strip()
-            duracao = input("Digite a duração do novo plano: ").title().strip()
-            valor = input("Digite o valor do novo Plano: ").strip()
-            beneficios = input(
-                "Digite os benefícios do novo plano (separados por vírgula): ").strip()
+        print("\nIniciando cadastramento, tecle Enter para TODAS as opções caso queira abortar o cadastramento!\n")
 
+        nome_plano = input("Digite o nome do novo plano: ").title().strip()
+        duracao = input("Digite a duração do novo plano: ").title().strip()
+        valor = input("Digite o valor do novo Plano: ").strip()
+        beneficios = input(
+            "Digite os benefícios do novo plano (separados por vírgula): ").strip()
+
+        if duracao and nome_plano and valor and beneficios:
             self.cursor.execute('INSERT INTO planos (nome, duracao, valor, beneficios) VALUES (?,?,?,?)', (
                 nome_plano, duracao, valor, beneficios))
             self.salvar()
@@ -131,25 +137,47 @@ class Administrador:
         mes_referencia = datetime.today().strftime('%m/%Y')
 
         self.cursor.execute(
-            "SELECT * FROM faturas WHERE id_aluno = ? AND mes = ?", (id_aluno, mes_referencia))
+            "SELECT * FROM faturas WHERE usuario_id = ? AND mes_referencia = ?", (id_aluno, mes_referencia))
         if self.cursor.fetchone():
             print("Pagamento já registrado para este mês!")
             return
 
-        self.cursor.execute("INSERT INTO faturas (id_aluno, nome, email, mes, data_pagamento, status) VALUES (?, ?, ?, ?, ?, 'Pago')",
-                            (id_aluno, nome, email, mes_referencia, data_pagamento))
+        self.cursor.execute("INSERT INTO faturas (usuario_id, mes_referencia, data_pagamento, status, nome) VALUES (?, ?, ?, 'Pago', ?)",
+                            (id_aluno, mes_referencia, data_pagamento, nome))
         self.salvar()
         print("Pagamento registrado com sucesso!")
 
     # método que vai visualizar os pagos
     def visualizar_pagos(self):
-        self.cursor.execute("SELECT * FROM faturas")
-        pagamentos = self.cursor.fetchall()
-        if pagamentos:
-            for pagamento in pagamentos:
-                print(pagamento)
+        mes_referencia = datetime.today().strftime("%m/%Y")
+
+        print("\n--- Alunos com Pagamento Confirmado ---")
+        self.cursor.execute(
+            "SELECT nome, data_pagamento, status FROM faturas WHERE mes_referencia = ?",
+            (mes_referencia,)
+        )
+        pagos = self.cursor.fetchall()
+
+        if pagos:
+            for aluno in pagos:
+                print(
+                    f"Nome: {aluno[0]}, Data Pagamento: {aluno[1]}, Status: {aluno[2]}")
         else:
-            print("Nenhum pagamento registrado!")
+            print("Nenhum pagamento registrado.")
+
+        print("\n--- Alunos com Pagamento Pendente ---")
+        self.cursor.execute("""
+            SELECT nome, email FROM usuarios 
+            WHERE tipo = 'Aluno' 
+            AND id NOT IN (SELECT usuario_id FROM faturas WHERE mes_referencia = ?)
+        """, (mes_referencia,))
+        nao_pagos = self.cursor.fetchall()
+
+        if nao_pagos:
+            for aluno in nao_pagos:
+                print(f"Nome: {aluno[0]}, Email: {aluno[1]}")
+        else:
+            print("Todos os alunos pagaram.")
 
     # método que vai registrar presenças
     def registrar_presenca(self):
@@ -181,13 +209,13 @@ class Administrador:
 
         # Verifica se a presença já foi registrada
         self.cursor.execute(
-            "SELECT * FROM presencas WHERE id_aluno = ? AND dia = ?", (id_aluno, dia_atual))
+            "SELECT * FROM presencas WHERE usuario_id = ? AND data = ?", (id_aluno, dia_atual))
         if self.cursor.fetchone():
             print("Presença já registrada para hoje!")
             return
 
         # Registra a presença na tabela
-        self.cursor.execute("INSERT INTO presencas (id_aluno, nome, email, dia, status) VALUES (?, ?, ?, 'Presente')",
+        self.cursor.execute("INSERT INTO presencas (usuario_id, nome, data, status) VALUES (?, ?, ?, 'Presente')",
                             (id_aluno, nome, dia_atual))
 
         self.salvar()
@@ -216,7 +244,7 @@ class Administrador:
     # método que vai contar o total de presencas e salvar em um arquivo csv
     def gerar_relatorio_frequencia(self):
         self.cursor.execute(
-            "SELECT id_aluno, nome, COUNT(*) as total_presencas FROM presencas GROUP BY id_aluno")
+            "SELECT usuario_id, nome, COUNT(*) as total_presencas FROM presencas GROUP BY usuario_id")
         frequencias = self.cursor.fetchall()
 
         if not frequencias:
@@ -242,18 +270,18 @@ class Administrador:
     # método que vai alterar as informações dos alunos
     def alterar_informacoes_alunos(self):
         nome = input(
-            "Digite o nome do aluno que deseja alterar: ").strip().title()
+            "Digite o nome do usuario que deseja alterar: ").strip().title()
 
         # Verifica se o aluno existe
         self.cursor.execute(
-            "SELECT id FROM usuarios WHERE nome = ? AND tipo = 'Aluno'", (nome,))
-        aluno = self.cursor.fetchone()
+            "SELECT id FROM usuarios WHERE nome = ?", (nome,))
+        usuario = self.cursor.fetchone()
 
-        if not aluno:
-            print("Aluno não encontrado!")
+        if not usuario:
+            print("usuario não encontrado!")
             return
 
-        print("Aluno encontrado! Digite as novas informações ou pressione Enter para manter as atuais.")
+        print("Usuario encontrado! Digite as novas informações ou pressione Enter para manter as atuais.")
 
         novo_email = input("Novo email: ").strip()
         novo_plano = input("Novo tipo de plano: ").strip()
@@ -274,30 +302,41 @@ class Administrador:
         self.salvar()
         print("Informações do aluno atualizadas com sucesso!")
 
+    def tratar_entrada(self):
+        while True:
+            entrada = input(
+                "Digite o número da sua escolha (1 a 10): ").strip()
+            if entrada.isdigit():  # Verifica se a entrada é composta apenas por números
+                numero = int(entrada)
+                if 1 <= numero <= 10:  # Verifica se está no intervalo permitido
+                    return numero
+            print("Entrada inválida! Por favor, digite um número de 1 a 10.")
+
     # método que vai alterar informações de alunos
 if __name__ == "__main__":
     admin = Administrador()
     while True:
         admin.cabecalho()
-        opcao = input("Digite o número da sua escolha: ").strip()
-        if opcao == '1':
+        opcao = admin.tratar_entrada()
+        if opcao == 1:
             admin.cadastrar_usuario()
-        elif opcao == '2':
+        elif opcao == 2:
             admin.ver_usuario()
-        elif opcao == '3':
+        elif opcao == 3:
             admin.cadastrar_plano()
-        elif opcao == '4':
+        elif opcao == 4:
             admin.registrar_pagamento()
-        elif opcao == '5':
+        elif opcao == 5:
             admin.registrar_presenca()
-        elif opcao == '6':
+        elif opcao == 6:
             admin.gerar_relatorio_frequencia()
-        elif opcao == '7':
+        elif opcao == 7:
             admin.alterar_informacoes_alunos()
-        elif opcao == '8':
+        elif opcao == 8:
             admin.visualizar_pagos()
-        elif opcao == '9':
+        elif opcao == 9:
             admin.redefinir_senha()
-        elif opcao == '10':
+        elif opcao == 10:
             print("Saindo do sistema...")
+            admin.fechar_conexao()
             break
