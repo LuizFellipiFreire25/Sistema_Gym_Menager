@@ -129,13 +129,12 @@ class Aluno:
         if progresso:
             datas, pesos = zip(*progresso)
             plt.figure(figsize=(10, 6))
-            plt.plot(datas, pesos, marker='o', linestyle='-', color='b')
+            plt.bar(datas, pesos, color='b', alpha=0.7)
             plt.xlabel("Data")
             plt.ylabel("Peso (Kg)")
             plt.title("Evolução do Peso")
-            plt.grid(True)
+            plt.grid(axis='y', linestyle='--', alpha=0.7)
             plt.show()
-
         else:
             print("Nenhum dado de progresso encontrado!")
 
