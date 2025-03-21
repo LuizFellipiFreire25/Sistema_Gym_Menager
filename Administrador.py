@@ -68,18 +68,6 @@ class Administrador:
         print(f"{nome}, seu ID é: {id}")
         sleep(2)
 
-<<<<<<< HEAD
-    # método responsável por promover a visualização de um aluno
-    def Ver_Usuário(self):
-        # solicitando o id do aluno para verificação
-        nome = (
-            input("Digite o nome do Aluno que você deseja filtrar: ").strip().title())
-        # verificando se existe o id
-        # .astype(str) serve para passar todos os argumentos para string, para nao dar erro na comparação
-        # se toda comparação for feita considerando o Id ser uma string então nao tem erro
-        if nome in self.tabela['Nome'].values:
-            print("Aluno encontrado...")
-=======
         self.cursor.execute(
             'INSERT INTO usuarios (id, nome, email, senha, tipo, plano) VALUES (?,?,?,?,?,?)', (id, nome, email, senha, tipo, plano))
 
@@ -94,7 +82,6 @@ class Administrador:
         usuario = self.cursor.fetchone()
         if usuario:
             print("Usuário encontrado! ")
->>>>>>> desenvolvimento
             sleep(1)
             print(usuario)
             sleep(1)
