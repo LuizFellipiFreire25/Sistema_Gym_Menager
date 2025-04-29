@@ -1,30 +1,55 @@
 
 {% extends "base.html" %}
-{% block title %}Personal Dashboard{% endblock %}
+{% block title %}Dashboard do Personal{% endblock %}
 {% block content %}
-<h1>Dashboard do Personal</h1>
-<div class="row mt-4">
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Avaliações Pendentes</h5>
-                <a href="#" class="btn btn-primary">Acessar</a>
+<div class="container mt-4">
+    <h1>Dashboard do Personal Trainer</h1>
+    <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Avaliações Pendentes</h5>
+                    <p class="card-text">Visualize e aceite avaliações dos alunos</p>
+                    <button onclick="verAvaliacoes()" class="btn btn-primary">Acessar</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Atribuir Treinos</h5>
+                    <p class="card-text">Defina treinos personalizados</p>
+                    <button onclick="atribuirTreino()" class="btn btn-primary">Acessar</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Dúvidas Pendentes</h5>
+                    <p class="card-text">Responda às dúvidas dos alunos</p>
+                    <button onclick="verDuvidas()" class="btn btn-primary">Acessar</button>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Atribuir Treinos</h5>
-                <a href="#" class="btn btn-primary">Acessar</a>
+    <div class="row mt-3">
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Progresso dos Alunos</h5>
+                    <p class="card-text">Acompanhe a evolução dos alunos</p>
+                    <button onclick="verProgresso()" class="btn btn-primary">Acessar</button>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Responder Dúvidas</h5>
-                <a href="#" class="btn btn-primary">Acessar</a>
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Redefinir Senha</h5>
+                    <p class="card-text">Altere sua senha de acesso</p>
+                    <button onclick="redefinirSenha()" class="btn btn-primary">Acessar</button>
+                </div>
             </div>
         </div>
     </div>

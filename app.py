@@ -395,6 +395,159 @@ def personal_dashboard():
         return redirect(url_for('login'))
     return render_template('personal/dashboard.html')
 
+@app.route('/personal/avaliacoes')
+@login_required
+def personal_avaliacoes():
+    if session['user_type'] != 'Personal':
+        return redirect(url_for('login'))
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM avaliacoes WHERE personal_id IS NULL')
+    avaliacoes = cursor.fetchall()
+    conn.close()
+    
+    return jsonify({'avaliacoes': avaliacoes})
+
+@app.route('/personal/aceitar-avaliacao', methods=['POST'])
+@login_required
+def personal_aceitar_avaliacao():
+    if session['user_type'] != 'Personal':
+        return redirect(url_for('login'))
+    
+    avaliacao_id = request.form.get('avaliacao_id')
+    personal_id = session['user_id']
+    dia_escolhido = request.form.get('dia')
+    horario_escolhido = request.form.get('horario')
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    
+    status = f"Avaliação marcada para {dia_escolhido} às {horario_escolhido} pelo Personal {personal_id}"
+    cursor.execute("UPDATE avaliacoes SET status = ?, personal_id = ? WHERE id = ?",
+                  (status, personal_id, avaliacao_id))
+    
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Avaliação aceita com sucesso'})
+
+@app.route('/personal/progresso/<aluno_nome>')
+@login_required
+def personal_ver_progresso(aluno_nome):
+    if session['user_type'] != 'Personal':
+        return redirect(url_for('login'))
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT id FROM usuarios WHERE nome = ?', (aluno_nome,))
+    aluno = cursor.fetchone()
+    
+    if aluno:
+        cursor.execute("SELECT data, peso, altura, imc FROM progresso WHERE aluno_id = ?", (aluno[0],))
+        progresso = cursor.fetchall()
+        conn.close()
+        return jsonify({'progresso': progresso})
+    
+    conn.close()
+    return jsonify({'error': 'Aluno não encontrado'})
+
+@app.route('/personal/presencas/<aluno_nome>')
+@login_required
+def personal_ver_presencas(aluno_nome):
+    if session['user_type'] != 'Personal':
+        return redirect(url_for('login'))
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT id FROM usuarios WHERE nome = ?', (aluno_nome,))
+    aluno = cursor.fetchone()
+    
+    if aluno:
+        cursor.execute('SELECT data, status FROM presencas WHERE usuario_id = ?', (aluno[0],))
+        presencas = cursor.fetchall()
+        conn.close()
+        return jsonify({'presencas': presencas})
+    
+    conn.close()
+    return jsonify({'error': 'Aluno não encontrado'})
+
+@app.route('/personal/atribuir-treino', methods=['POST'])
+@login_required
+def personal_atribuir_treino():
+    if session['user_type'] != 'Personal':
+        return redirect(url_for('login'))
+    
+    nome_aluno = request.form.get('nome_aluno')
+    treino = request.form.get('treino')
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    
+    cursor.execute('SELECT id FROM usuarios WHERE nome = ?', (nome_aluno,))
+    aluno = cursor.fetchone()
+    
+    if aluno:
+        data_atual = datetime.now().strftime('%Y-%m-%d')
+        cursor.execute("INSERT INTO treinos_personalizados (aluno_id, treino, data_atribuicao) VALUES (?, ?, ?)",
+                      (aluno[0], treino, data_atual))
+        conn.commit()
+        conn.close()
+        return jsonify({'message': 'Treino atribuído com sucesso'})
+    
+    conn.close()
+    return jsonify({'error': 'Aluno não encontrado'})
+
+@app.route('/personal/duvidas')
+@login_required
+def personal_ver_duvidas():
+    if session['user_type'] != 'Personal':
+        return redirect(url_for('login'))
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, aluno_id, duvida, status FROM duvidas WHERE status = 'Pendente'")
+    duvidas = cursor.fetchall()
+    conn.close()
+    
+    return jsonify({'duvidas': duvidas})
+
+@app.route('/personal/responder-duvida', methods=['POST'])
+@login_required
+def personal_responder_duvida():
+    if session['user_type'] != 'Personal':
+        return redirect(url_for('login'))
+    
+    duvida_id = request.form.get('duvida_id')
+    resposta = request.form.get('resposta')
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    cursor.execute("UPDATE duvidas SET resposta = ?, status = 'Respondida' WHERE id = ?",
+                  (resposta, duvida_id))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'message': 'Dúvida respondida com sucesso'})
+
+@app.route('/personal/redefinir-senha', methods=['POST'])
+@login_required
+def personal_redefinir_senha():
+    if session['user_type'] != 'Personal':
+        return redirect(url_for('login'))
+    
+    email = session['user_email']
+    nova_senha = request.form.get('nova_senha')
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    cursor.execute("UPDATE usuarios SET senha = ? WHERE email = ?", (nova_senha, email))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'message': 'Senha alterada com sucesso'})
+
 @app.route('/logout')
 def logout():
     session.clear()
