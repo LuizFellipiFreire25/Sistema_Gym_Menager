@@ -2,29 +2,70 @@
 {% extends "base.html" %}
 {% block title %}Admin Dashboard{% endblock %}
 {% block content %}
-<h1>Dashboard do Administrador</h1>
-<div class="row mt-4">
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Cadastrar Usuário</h5>
-                <a href="#" class="btn btn-primary">Acessar</a>
+<div class="container mt-4">
+    <h1 class="mb-4">Dashboard do Administrador</h1>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Cadastrar Usuário</h5>
+                    <p class="card-text">Adicione novos usuários ao sistema</p>
+                    <a href="{{ url_for('cadastrar_usuario') }}" class="btn btn-primary">Acessar</a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Gerenciar Planos</h5>
-                <a href="#" class="btn btn-primary">Acessar</a>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Ver Usuário</h5>
+                    <p class="card-text">Consulte informações de usuários</p>
+                    <a href="{{ url_for('ver_usuario') }}" class="btn btn-primary">Acessar</a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-4 mb-3">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Registrar Pagamento</h5>
-                <a href="#" class="btn btn-primary">Acessar</a>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Cadastrar Plano</h5>
+                    <p class="card-text">Adicione novos planos</p>
+                    <a href="{{ url_for('cadastrar_plano') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Registrar Pagamento</h5>
+                    <p class="card-text">Registre pagamentos de alunos</p>
+                    <a href="{{ url_for('registrar_pagamento') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Registrar Presença</h5>
+                    <p class="card-text">Marque presença dos alunos</p>
+                    <a href="{{ url_for('registrar_presenca') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Relatório de Frequência</h5>
+                    <p class="card-text">Visualize o relatório de presenças</p>
+                    <a href="{{ url_for('relatorio_frequencia') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Status de Pagamentos</h5>
+                    <p class="card-text">Veja quem pagou e quem não pagou</p>
+                    <a href="{{ url_for('status_pagamentos') }}" class="btn btn-primary">Acessar</a>
+                </div>
             </div>
         </div>
     </div>
