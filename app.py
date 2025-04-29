@@ -1,5 +1,6 @@
 
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from datetime import datetime
 import sqlite3
 from functools import wraps
 
@@ -205,6 +206,187 @@ def aluno_dashboard():
     if session['user_type'] != 'Aluno':
         return redirect(url_for('login'))
     return render_template('aluno/dashboard.html')
+
+@app.route('/aluno/treinos')
+@login_required
+def aluno_treinos():
+    if session['user_type'] != 'Aluno':
+        return redirect(url_for('login'))
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    email = session['user_email']
+    
+    cursor.execute('SELECT id FROM usuarios WHERE email = ?', (email,))
+    usuario_id = cursor.fetchone()[0]
+    
+    cursor.execute(
+        'SELECT treino FROM treinos_personalizados WHERE aluno_id = ? ORDER BY data_atribuicao DESC LIMIT 1', 
+        (usuario_id,)
+    )
+    treino = cursor.fetchone()
+    conn.close()
+    
+    return jsonify({'treino': treino[0] if treino else None})
+
+@app.route('/aluno/avaliacao', methods=['GET', 'POST'])
+@login_required
+def aluno_avaliacao():
+    if session['user_type'] != 'Aluno':
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        conn = sqlite3.connect('academia.db')
+        cursor = conn.cursor()
+        email = session['user_email']
+        
+        cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
+        aluno_id = cursor.fetchone()[0]
+        
+        dias_disponiveis = request.form.get('dias_disponiveis')
+        horarios_disponiveis = request.form.get('horarios_disponiveis')
+        
+        cursor.execute("""
+            INSERT INTO avaliacoes (aluno_id, disponibilidade, horario, status, personal_id)
+            VALUES (?, ?, ?, ?, NULL)
+        """, (aluno_id, dias_disponiveis, horarios_disponiveis, "Pendente"))
+        
+        conn.commit()
+        conn.close()
+        return jsonify({'message': 'Avaliação agendada com sucesso'})
+        
+    return jsonify({'message': 'Use POST para agendar avaliação'})
+
+@app.route('/aluno/status-avaliacao')
+@login_required
+def aluno_status_avaliacao():
+    if session['user_type'] != 'Aluno':
+        return redirect(url_for('login'))
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    email = session['user_email']
+    
+    cursor.execute('SELECT id FROM usuarios WHERE email = ?', (email,))
+    usuario_id = cursor.fetchone()[0]
+    
+    cursor.execute(
+        "SELECT status FROM avaliacoes WHERE aluno_id = ? ORDER BY id DESC LIMIT 1", 
+        (usuario_id,)
+    )
+    status = cursor.fetchone()
+    conn.close()
+    
+    return jsonify({'status': status[0] if status else None})
+
+@app.route('/aluno/progresso', methods=['GET', 'POST'])
+@login_required
+def aluno_progresso():
+    if session['user_type'] != 'Aluno':
+        return redirect(url_for('login'))
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    email = session['user_email']
+    
+    if request.method == 'POST':
+        peso = float(request.form.get('peso'))
+        altura = float(request.form.get('altura'))
+        imc = round(peso / (altura ** 2), 2)
+        data_atual = datetime.now().strftime('%Y-%m-%d')
+        
+        cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
+        aluno_id = cursor.fetchone()[0]
+        
+        cursor.execute(
+            "INSERT INTO progresso (aluno_id, data, peso, altura, imc) VALUES (?, ?, ?, ?, ?)",
+            (aluno_id, data_atual, peso, altura, imc)
+        )
+        conn.commit()
+        
+    cursor.execute("SELECT id FROM usuarios WHERE email = ?", (email,))
+    aluno_id = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT data, peso, altura, imc FROM progresso WHERE aluno_id = ?", (aluno_id,))
+    progresso = cursor.fetchall()
+    conn.close()
+    
+    return jsonify({'progresso': progresso})
+
+@app.route('/aluno/fatura')
+@login_required
+def aluno_fatura():
+    if session['user_type'] != 'Aluno':
+        return redirect(url_for('login'))
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    email = session['user_email']
+    
+    cursor.execute('SELECT id FROM usuarios WHERE email = ?', (email,))
+    usuario_id = cursor.fetchone()[0]
+    
+    mes_atual = datetime.now().strftime("%m/%Y")
+    cursor.execute(
+        'SELECT status FROM faturas WHERE usuario_id = ? AND mes_referencia = ?', 
+        (usuario_id, mes_atual)
+    )
+    status = cursor.fetchone()
+    conn.close()
+    
+    return jsonify({'status': status[0] if status else 'Não encontrada'})
+
+@app.route('/aluno/duvida', methods=['POST'])
+@login_required
+def aluno_duvida():
+    if session['user_type'] != 'Aluno':
+        return redirect(url_for('login'))
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    email = session['user_email']
+    
+    cursor.execute('SELECT id FROM usuarios WHERE email = ?', (email,))
+    usuario_id = cursor.fetchone()[0]
+    
+    cursor.execute(
+        "SELECT status FROM duvidas WHERE aluno_id = ? ORDER BY id DESC LIMIT 1", 
+        (usuario_id,)
+    )
+    pendente = cursor.fetchone()
+    
+    if pendente and pendente[0] == 'Pendente':
+        conn.close()
+        return jsonify({'error': 'Você já tem uma dúvida pendente'})
+    
+    duvida = request.form.get('duvida')
+    data_atual = datetime.now().strftime("%Y-%m-%d")
+    
+    cursor.execute(
+        "INSERT INTO duvidas (aluno_id, data, duvida, resposta, status) VALUES (?, ?, ?, ?, ?)",
+        (usuario_id, data_atual, duvida, "Aguardando resposta do personal", "Pendente")
+    )
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'message': 'Dúvida enviada com sucesso'})
+
+@app.route('/aluno/redefinir-senha', methods=['POST'])
+@login_required
+def aluno_redefinir_senha():
+    if session['user_type'] != 'Aluno':
+        return redirect(url_for('login'))
+    
+    email = session['user_email']
+    nova_senha = request.form.get('nova_senha')
+    
+    conn = sqlite3.connect('academia.db')
+    cursor = conn.cursor()
+    cursor.execute("UPDATE usuarios SET senha = ? WHERE email = ?", (nova_senha, email))
+    conn.commit()
+    conn.close()
+    
+    return jsonify({'message': 'Senha alterada com sucesso'})
 
 @app.route('/personal')
 @login_required
