@@ -1,3 +1,7 @@
 
 matplotlib
 pandas
+flask
+flask-session
+flask
+flask-session
