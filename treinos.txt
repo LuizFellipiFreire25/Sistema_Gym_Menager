@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # TREINOS DE HIPERTROFIA
 Treino A - Peito e Tríceps
 Descrição: Foco no desenvolvimento do peitoral e tríceps.
@@ -82,3 +83,89 @@ Exercícios:
 - Agachamento profundo com pausa - 3x12
 - Prancha com toque no ombro - 3x12
 
+=======
+# TREINOS DE HIPERTROFIA
+Treino A - Peito e Tríceps
+Descrição: Foco no desenvolvimento do peitoral e tríceps.
+Exercícios:
+- Supino reto - 4x10
+- Supino inclinado - 3x12
+- Crossover na polia - 3x12
+- Paralelas - 3x10
+- Tríceps na polia - 3x12
+- Tríceps francês - 3x10
+
+Treino B - Costas e Bíceps
+Descrição: Foco no fortalecimento das costas e bíceps.
+Exercícios:
+- Barra fixa - 4x8
+- Remada curvada - 3x10
+- Puxada alta - 3x12
+- Rosca direta - 3x12
+- Rosca alternada - 3x10
+- Rosca martelo - 3x10
+
+Treino C - Pernas
+Descrição: Desenvolvimento dos membros inferiores.
+Exercícios:
+- Agachamento livre - 4x10
+- Leg press - 3x12
+- Cadeira extensora - 3x12
+- Cadeira flexora - 3x12
+- Panturrilha em pé - 3x15
+- Avanço com halteres - 3x12
+
+# TREINOS PARA EMAGRECIMENTO
+Treino HIIT 1
+Descrição: Treino de alta intensidade para queima calórica.
+Exercícios:
+- Polichinelos - 30s
+- Agachamento com salto - 30s
+- Mountain climbers - 30s
+- Burpees - 30s
+- Descanso - 30s (Repetir 4 vezes)
+
+Treino HIIT 2
+Descrição: Variedade de exercícios cardiovasculares.
+Exercícios:
+- Corrida no lugar - 30s
+- Agachamento isométrico - 30s
+- Saltos laterais - 30s
+- Flexões - 30s
+- Descanso - 30s (Repetir 4 vezes)
+
+# TREINOS DE RESISTÊNCIA
+Treino Circuito 1
+Descrição: Melhora a resistência muscular e cardiovascular.
+Exercícios:
+- Remada na barra fixa - 3x12
+- Afundo alternado - 3x12
+- Abdominais na prancha - 3x15
+- Levantamento terra - 3x10
+
+Treino Circuito 2
+Descrição: Treino de resistência para corpo todo.
+Exercícios:
+- Kettlebell swing - 3x15
+- Prancha - 3x40s
+- Agachamento sumô - 3x12
+- Saltos na caixa - 3x12
+
+# TREINOS PARA MOBILIDADE
+Treino de Alongamento 1
+Descrição: Foca na flexibilidade e recuperação muscular.
+Exercícios:
+- Alongamento de isquiotibiais - 30s por perna
+- Rotação de quadril - 30s por lado
+- Ponte de glúteos - 3x15
+- Posição de criança (Yoga) - 40s
+
+Treino de Mobilidade 2
+Descrição: Prepara o corpo para exercícios de força.
+Exercícios:
+- Rotação de ombros com elástico - 3x12
+- Mobilização do tornozelo - 3x15
+- Agachamento profundo com pausa - 3x12
+- Prancha com toque no ombro - 3x12
+
+>>>>>>> main
