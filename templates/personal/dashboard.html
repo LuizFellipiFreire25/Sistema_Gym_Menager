@@ -1,0 +1,64 @@
+
+{% extends "base.html" %}
+{% block title %}Dashboard do Personal{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Dashboard do Personal Trainer</h1>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Avaliações Pendentes</h5>
+                    <p class="card-text">Visualize e aceite avaliações</p>
+                    <a href="{{ url_for('personal_avaliacoes') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Visualizar Progresso</h5>
+                    <p class="card-text">Acompanhe a evolução dos alunos</p>
+                    <a href="{{ url_for('personal_ver_progresso', aluno_nome='') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Visualizar Presenças</h5>
+                    <p class="card-text">Veja o histórico de presenças</p>
+                    <a href="{{ url_for('personal_ver_presencas', aluno_nome='') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Atribuir Treinos</h5>
+                    <p class="card-text">Defina treinos personalizados</p>
+                    <a href="{{ url_for('personal_atribuir_treino') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Responder Dúvidas</h5>
+                    <p class="card-text">Atenda às dúvidas dos alunos</p>
+                    <a href="{{ url_for('personal_ver_duvidas') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Redefinir Senha</h5>
+                    <p class="card-text">Altere sua senha de acesso</p>
+                    <a href="{{ url_for('personal_redefinir_senha') }}" class="btn btn-primary">Acessar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
